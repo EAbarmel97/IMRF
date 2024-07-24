@@ -1,0 +1,8 @@
+**/src/Manifest.toml 
+**/src/Project.toml
+.julenv
+simulations/simulations_T_*
+graphs/psd/*
+graphs/simulations/simulations_T_*
+.vscode
+.env

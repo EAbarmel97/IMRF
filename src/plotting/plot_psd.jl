@@ -1,0 +1,47 @@
+
+#=
+number of runs equals the number of files in ../magnetization/ and is the same for each simulations_T_x_y_z/magnetization dir
+so the first simulation directory is choosen 
+=#
+#const NUM_RUNS = length(readdir(ALL_GLOBAL_MAGN_DIRS[1]))
+
+function plot_rffts(NUM_RUNS::Int64)
+    #writing under each simulations_T_x_y_z/fourier/ dir the rfft at each run and plotting the psd
+    for i in eachindex(ALL_SIMULATIONS_DIRS)
+        # array of strings has generic strings of the the type: simulations_T_x_y_z
+        simul_dir_name = ALL_AUTOMATED_SIMULS_DIRS[i]
+        simul_sub_dir = replace(ALL_AUTOMATED_SIMULS_DIRS[i], "simulations_" => "")
+
+        for run in 1:NUM_RUNS
+            #= 
+            global magnetization with initial temperature T_x_y_z s is under the directory 
+            ../automated/simulations_T_x_y_z/magnetization/global_magnetization_rW.txt 
+            =#
+            global_magn_ts_path = joinpath(ALL_GLOBAL_MAGN_DIRS[i], readdir(ALL_GLOBAL_MAGN_DIRS[i])[run])
+            #temperature is taken from simulations dir name 
+            str_temp = replace(simul_dir_name, "simulations_T_" => "", "_" => ".")
+
+            #dir where rfft will be saved
+            fourier_dir = joinpath(AUTOMATED_SIMULS_DIR, ALL_AUTOMATED_SIMULS_DIRS[i], "fourier/")
+            rfft_path = joinpath(fourier_dir, "rfft_global_magnetization_$(str_temp)_r$run.txt")
+
+            #if strigified rfft file doesn't exist at dir ../automated/simulations_T_x_y_z/fourier/
+            if !isfile(rfft_path)
+                #rfft is computed from .txt files containing the global magnetization time series
+                rfft = rfft(global_magn_ts_path)
+                temp = parse(Float64, str_temp)
+                #rfft is saved  as a .txt in ../automated/simulations_T_x_y_z/fourier/
+                rfft_conf = RFFTConfig(fourier_dir, temp, run)
+                write_rfft(rfft, rfft_conf)
+            end
+        end
+
+        psd_plot_file_name = "psd_$(simul_sub_dir)_r_1_$(NUM_RUNS).pdf"
+        psd_plot_file_abs_path = joinpath(AUTOMATED_PSD_GRAPHS_SIMULS, psd_plot_file_name)
+
+        if !isfile(psd_plot_file_abs_path)
+            #plotting the power density spectra
+            plot_psd(simul_dir_name, AUTOMATED_PSD_GRAPHS_SIMULS)
+        end
+    end
+end

@@ -1,7 +1,26 @@
+"""
+    do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
+             display_lattice::Bool=false, flip_strategy::ISING_LATTICE_STRATEGY=random_strategy, 
+             trans_dynamics::ISING_LATTICE_DYNAMICS=metropolis_dynamics)
+
+Performs simulations of the Ising model with specified parameters, initializing the lattice with a given magnetization, updating its state over generations, and optionally displaying the lattice state and saving data to files.
+
+# Arguments
+- `INIT_MAGN`: The initial magnetization value for the spin grid.
+- `TEMP`: The temperature at which the simulation is run.
+- `N_GRID::Int64`: The size of the grid for the simulation.
+- `NUM_RUNS::Int64`: The number of simulation runs to be performed.
+- `NUM_GENERATIONS::Int64`: The number of generations for each simulation run.
+
+# Keyword Arguments
+- `display_lattice::Bool=false`: If `true`, the spin grid's state is displayed at each generation.
+- `flip_strategy::ISING_LATTICE_STRATEGY=random_strategy`: Strategy for flipping spins (e.g., `random_strategy`).
+- `trans_dynamics::ISING_LATTICE_DYNAMICS=metropolis_dynamics`: Dynamics model for transitions (e.g., `metropolis_dynamics`).
+"""
 function do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
     display_lattice::Bool=false,
-    flip_strategy::ISING_LATTICE_STRATEGY=random_strategy,
-    trans_dynamics::ISING_LATTICE_DYNAMICS=metropolis_dynamics)
+    flip_strategy::ISING_LATTICE_STRATEGY = random_strategy,
+    trans_dynamics::ISING_LATTICE_DYNAMICS = metropolis_dynamics)
     ising_model = IsingLattice(TEMP, N_GRID; flip_strategy = flip_strategy, 
     trans_dynamics = trans_dynamics)
 
@@ -18,9 +37,9 @@ function do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
         grid_evolution_aux_dir = create_dir(joinpath(aux_dir,"grid_evolution"), sub_dir)
     end    
     
-    rfim_info(N_GRID,NUM_RUNS,NUM_GENERATIONS)
+    rfim_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
 
-    for run in 1:NUM_RUNS
+    Threads.@threads for run in 1:NUM_RUNS
         reset_stats(ising_model)
         set_magnetization(INIT_MAGN, ising_model) #populates the spin grid with a given initial magnetization 
         update_magnetization(ising_model) #updates global magnetization 
@@ -72,7 +91,29 @@ function do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
     end
 end
 
-function do_simulations(arr::Vector{Float64}, N_GRID::Int64, NUM_RUNS::Int64, NUM_GENERATIONS::Int64; include_Tc::Bool=false, display_lattice::Bool=false)
+"""
+    do_simulations(arr::Vector{Float64}, N_GRID::Int64, NUM_RUNS::Int64, NUM_GENERATIONS::Int64;
+                   include_Tc::Bool=false, display_lattice::Bool=false, generate_rffts::Bool=false)
+
+Performs multiple simulation runs on a grid with specified parameters, optionally including a critical temperature, visualizing the lattice, 
+and generating random Fourier transforms.
+
+# Arguments
+- `arr::Vector{Float64}`: A vector of temperature values to be used in the simulations.
+- `N_GRID::Int64`: The size of the grid for the simulation.
+- `NUM_RUNS::Int64`: The number of simulation runs to be performed.
+- `NUM_GENERATIONS::Int64`: The number of generations for each simulation run.
+
+# Keyword Arguments
+- `include_Tc::Bool=false`: If `true`, the critical temperature (`CRITICAL_TEMP`) is added to the temperature array and sorted.
+- `display_lattice::Bool=false`: If `true`, the lattice will be displayed during the simulations.
+- `generate_rffts::Bool=false`: If `true`, random Fourier transforms will be generated and saved after the simulation runs.
+"""
+function do_simulations(arr::Vector{Float64}, N_GRID::Int64, 
+                    NUM_RUNS::Int64, NUM_GENERATIONS::Int64; 
+                    include_Tc::Bool=false,
+                    display_lattice::Bool=false,
+                    generate_rffts::Bool=false)
     if include_Tc
         push!(arr, CRITICAL_TEMP)
         sort!(arr)
@@ -86,4 +127,8 @@ function do_simulations(arr::Vector{Float64}, N_GRID::Int64, NUM_RUNS::Int64, NU
 
         do_model(rand_magn, temp, N_GRID, NUM_RUNS, NUM_GENERATIONS; display_lattice=display_lattice)
     end
+
+    #= if generate_rffts
+        write_rffts(NUM_RUNS)
+    end  =#    
 end

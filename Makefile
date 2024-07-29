@@ -3,6 +3,7 @@ include .env
 # Define the directory for the Julia environment
 JULIA_DEPOT_PATH := $(shell pwd)/.julenv
 
+DELETE_SIMULS := rm -rf simulations/* 
 UPDATE_PROJECT_TOML := cp $(JULIA_DEPOT_PATH)/Project.toml Project.toml
 
 ICN_UPDATE_PROJECT_TOML := cp $(ICN_JULIA_DEPOT_PATH)/Project.toml Project.toml
@@ -39,6 +40,9 @@ instantiate:
 precompile:
 	@julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.precompile()'
 
+simulate:
+	@julia --project=$(JULIA_DEPOT_PATH) main.jl $(ARGS)
+
 # Target to run Julia commands in the ICN environment
 icn_julia_env:
 	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(ARGS)
@@ -59,4 +63,7 @@ icn_instantiate:
 icn_precompile:
 	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.precompile()'
 
-.PHONY: julia_env add_to_env rm_from_env instantiate precompile icn_julia_env add_to_icn_env rm_from_icn_env icn_instantiate icn_precompile
+cleanup:
+	@$(DELETE_SIMULS)
+
+.PHONY: julia_env add_to_env rm_from_env instantiate precompile icn_julia_env add_to_icn_env rm_from_icn_env icn_instantiate icn_precompile cleanup

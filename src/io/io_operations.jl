@@ -1,43 +1,22 @@
 @enum DIRS dir = 1 sub_dir = 2
 
-struct RFFTConfig
-    destination_dir::String
-    at_temp::Float64
-    run::Int64
-end
-
-function write_to_csv(file_to_write::String, value::Any)
+function write_to_csv(file_to_write::String, value::Union{Any, Vector{Any}})
     if !isfile(file_to_write)
        @error "file $file_to_write does not exist"
     end 
+    
+    if  isa(value, Any)
+        CSV.write(file_to_write, DataFrame(col1 = [value]); append = true)
+        return
+    end
 
-    CSV.write(file_to_write, DataFrame(col1 = [value]); append = true)
+    CSV.write(file_to_write, DataFrame(col1 = value); append = true)
 end 
 
 #= Function to write over a .txt file a vector with the rfft of a signal(time series) =#
-function write_rfft(arr::Vector{ComplexF64}, rfft_conf::RFFTConfig)
-    if rfft_conf.at_temp != CRITICAL_TEMP    
-        rounded_temp = round(rfft_conf.at_temp, digits=2)
-        str_rounded_temp = replace("$rounded_temp","." => "_")
-        file_name = "$destination_dir/rfft_global_magnetization_$(str_rounded_temp)_r$(rfft_conf.run).txt"
-    else
-        str_Tc_temp = replace("$(rfft_conf.at_temp)","$(CRITICAL_TEMP)" => "Tc",)
-        file_name = "$destination_dir/rfft_global_magnetization_$(str_Tc_temp)_r$(rfft_conf.run).txt"
-    end
-
-    #if file doesn't exist 
-    if !isfile(file_name)  
-        touch(file_name)
-        fourier_transform_file = open(file_name,"a+")
-        for i in eachindex(arr)
-            write(fourier_transform_file,"$(arr[i])\n")
-            #for the last index
-            if i == length(arr)
-               write(fourier_transform_file,"$(arr[i])")
-            end    
-        end
-        close(fourier_transform_file)    
-    end
+function write_rfft(arr::Vector{ComplexF64}, write_to::String, run::Int64)
+    file_name = joinpath(write_to,"/rfft_global_magnetization_r$run.csv")
+    write_to_csv(file_name,arr)
 end
 
 function create_dir(dir_name::String, type_of_dict::DIRS, args...)::String
@@ -60,11 +39,7 @@ function rfim_info(N_GRID,NUM_RUNS,NUM_GENERATIONS)
     io = create_file(joinpath(SIMULATIONS_DIR, "rfim_details.txt"))
     open(io, "w+") do io
         write(
-            io,
-            "details: 
-            ngrid:$N_GRID,
-            nruns:$NUM_RUNS,
-            ngens:$NUM_GENERATIONS")
+            io, "details: ngrid:$N_GRID, nruns:$NUM_RUNS, ngens:$NUM_GENERATIONS")
     end
 end
 

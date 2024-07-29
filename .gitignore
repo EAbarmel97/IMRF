@@ -2,6 +2,7 @@
 **/src/Project.toml
 .julenv
 simulations/simulations_T_*
+simulations/rfim_details.txt
 graphs/psd/*
 graphs/simulations/simulations_T_*
 .vscode

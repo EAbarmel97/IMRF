@@ -6,11 +6,11 @@ using DataFrames, CSV, GLM
 using LaTeXStrings
 using Plots
 
-import FFTW
-
-include("fourier/fourier_analysis.jl")
+using FFTW
 
 include("io/io_operations.jl")
+
+include("fourier/fourier_analysis.jl")
 
 include("ising/ising_lattice.jl")
 include("ising/ising_lattice_methods.jl")

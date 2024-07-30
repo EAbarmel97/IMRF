@@ -1,12 +1,16 @@
+import FFTW
+
 """
-   FFTW.rfft(file_path::AbstractString)::Vector{ComplexF64}
+   rrfft(file_path::AbstractString)::Vector{ComplexF64}
 
 Function wrapper to the FFTW's rfft method. Takes a .csv file of numbers, parses it
 an computes its rfft
 """
-function FFTW.rfft(file_path::AbstractString)::Vector{ComplexF64}
-    time_series = Vector{Float64}(CSV.read(file_path;delim = ','))[:2]
-    return rfft(time_series) 
+function FFTW.rfft(file_path::String)::Vector{ComplexF64}
+    data_matrix = load_data_matrix(Float64, file_path; drop_header = false, centralize = false)
+    ts = vec(data_matrix)
+     
+    return rfft(ts)
 end
 
 #= Function to compute the power spectral density =#

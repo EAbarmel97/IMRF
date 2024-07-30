@@ -128,7 +128,7 @@ function do_simulations(arr::Vector{Float64}, N_GRID::Int64,
         do_model(rand_magn, temp, N_GRID, NUM_RUNS, NUM_GENERATIONS; display_lattice=display_lattice)
     end
 
-    #= if generate_rffts
+    if generate_rffts
         write_rffts(NUM_RUNS)
-    end  =#    
+    end 
 end

@@ -70,7 +70,6 @@ function rfim_info(N_GRID,NUM_RUNS,NUM_GENERATIONS)
     end
 end
 
-
 function filter_directory_names(dir_names::Vector{String}, rgx::Regex)::Vector{String}
     filtered_array = filter(str -> contains(str, rgx), dir_names)
     if isempty(filtered_array)

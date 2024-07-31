@@ -43,27 +43,10 @@ precompile:
 simulate:
 	@julia --project=$(JULIA_DEPOT_PATH) main.jl $(ARGS)
 
-# Target to run Julia commands in the ICN environment
-icn_julia_env:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(ARGS)
-
-# Target to add a package to the ICN environment
-add_to_icn_env:
-	@$(ICN_ADD_AND_UPDATE)
-
-# Target to remove a package from the ICN environment
-rm_from_icn_env:
-	@$(ICN_REMOVE_AND_UPDATE)
-
-# Target to resolve dependencies and instantiate the ICN environment
-icn_instantiate:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
-
-# Target to precompile packages in the ICN environment
-icn_precompile:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.precompile()'
+plot_trazes:
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_trazes.jl $(ARG)
 
 cleanup:
 	@$(DELETE_SIMULS)
 
-.PHONY: julia_env add_to_env rm_from_env instantiate precompile icn_julia_env add_to_icn_env rm_from_icn_env icn_instantiate icn_precompile cleanup
+.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate cleanup plot_trazes

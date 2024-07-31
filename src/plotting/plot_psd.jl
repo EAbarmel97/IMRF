@@ -1,11 +1,5 @@
 
-#=
-number of runs equals the number of files in ../magnetization/ and is the same for each simulations_T_x_y_z/magnetization dir
-so the first simulation directory is choosen 
-=#
-#const NUM_RUNS = length(readdir(ALL_GLOBAL_MAGN_DIRS[1]))
-
-function plot_rffts(NUM_RUNS::Int64)
+function plot_rffts()
     #writing under each simulations_T_x_y_z/fourier/ dir the rfft at each run and plotting the psd
     for i in eachindex(ALL_SIMULATIONS_DIRS)
         # array of strings has generic strings of the the type: simulations_T_x_y_z
@@ -40,7 +34,6 @@ function plot_rffts(NUM_RUNS::Int64)
         psd_plot_file_abs_path = joinpath(AUTOMATED_PSD_GRAPHS_SIMULS, psd_plot_file_name)
 
         if !isfile(psd_plot_file_abs_path)
-            #plotting the power density spectra
             plot_psd(simul_dir_name, AUTOMATED_PSD_GRAPHS_SIMULS)
         end
     end

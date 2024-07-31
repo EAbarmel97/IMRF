@@ -1,22 +1,52 @@
-#= Function to save the traces of the time series contained in .txt files =#
-function _plot_traze(save_to::String, file_path::String, statistic::Function)::Vector{Float64}
+"""
+    plot_traze(file_path::String, run::Int64, save_to::String; statistic::Function = mean)
 
-    df = CSV.read(file_path, CSV.Tables.matrix;delim=',' , header=false)
-    sample_magnetization_df = statistic.(df, axis=1)
-    time_series = Matrix{Float64}(sample_magnetization_df)[:2]
+Plot the time series of magnetization data and save the plot as a PDF file.
 
-    x = collect(0:(length(time_series)-1))
-    y = time_series
+# Arguments
+- `file_path::String`: The path to the file containing the magnetization data matrix.
+- `run::Int64`: The run number to be included in the output file name.
+- `save_to::String`: The directory path where the output PDF file should be saved.
+- `statistic::Function = mean`: A function to calculate a statistic on the magnetization data (default is `mean`).
+"""
+function plot_traze(file_path::String, run::Int64, save_to::String,statistic::Function = mean)
+    magnetization_data = load_data_matrix(Float64, file_path::String; drop_header=false, centralize=false)
+    ts = vec(magnetization_data)
+
+    x = collect(0:(length(ts)-1))
+    y = ts
     
     plt = plot(x, y, label= L"M_n") #plot reference 
-    hline!(plt, [mean, mean], label=L"\overline{M}_n",linewidth=3)
+    hline!(plt, [statistic(y), statistic(y)], label=L"\overline{M}_n",linewidth=3)
     ylims!(-1.0, 1.0)
-    xlims!(0, length(time_series))
+    xlims!(0, length(ts))
     xlabel!(L"n")
     ylabel!(L"M_n")
-    savefig(plt, save_to) #saving plot reference as a file with pdf extension at a given directory  
+
+    savefig(plt, joinpath(save_to, "global_magnetization_r$run.pdf")) 
 end
 
+"""
+    plot_trazes(statistic::Function = mean)
+
+Generate and save plots of magnetization time series for multiple simulation runs.
+
+# Arguments
+- `statistic::Function = mean`: A function to calculate a statistic on the magnetization data (default is `mean`).
+"""
+function plot_trazes(statistic::Function = mean)
+    All_MAGNETIZATION_DIRS = joinpath.(readdir(abspath(SIMULATIONS_DIR), join=true),"magnetization")[3:end]
+    for i in eachindex(All_MAGNETIZATION_DIRS)
+        num_runs = length(readdir(All_MAGNETIZATION_DIRS[i]))
+
+        str_simulation_temp = match(r"simulations_T_[0-9]_[0-9]+", All_MAGNETIZATION_DIRS[i]).match
+
+        ts_plot_dir = create_dir(joinpath(GRAPHS_DIR_SIMULATIONS, str_simulation_temp), sub_dir)
+        for run in 1:num_runs
+            plot_traze(joinpath(All_MAGNETIZATION_DIRS[i],"global_magnetization_r$run.csv"),run,ts_plot_dir,statistic)
+        end    
+    end    
+end
 
 """
     calculate_median_magnetization(temp_abs_dir::String, num_runs::Int64)::Float64

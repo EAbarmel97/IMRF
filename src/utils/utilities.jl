@@ -41,3 +41,7 @@ function count_runs_in_dir(simuls_dir::String, aux_dir_name::String)::Int64
 end
 
 const DEFAULT_TEMPERATURE_ARRAY = default_temperature_array()
+
+function average_by_realization()
+    
+end

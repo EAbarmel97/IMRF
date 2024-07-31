@@ -1,6 +1,7 @@
 module RFIM
 using Base.Threads
 using LinearAlgebra
+using Statistics 
 
 using DataFrames, CSV, GLM
 using LaTeXStrings
@@ -24,7 +25,7 @@ include("utils/paths.jl")
 
 export do_simulations #ising_core exports
 
-export plot_sample_magnetization
+export plot_traze, plot_trazes
 
 export DEFAULT_TEMPERATURE_ARRAY
 end #end of module

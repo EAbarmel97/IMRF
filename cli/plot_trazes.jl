@@ -1,20 +1,21 @@
 include("../src/RFIM.jl")
-using .RFIM: do_simulations
+using .RFIM: plot_trazes, plot_ensamblated_magnetization
 
-function plot(include_ensamble_magnetization::Bool=false)
+function __plot(plot_ensamble_magnetization::Bool=false)
     RFIM.plot_trazes()
 
-    if include_ensamble_magnetization
-       #plot_ensamblated_magnetization()
-       println("here goes the ensamblated magnetization")
+    if plot_ensamble_magnetization
+       ensamblated_magnetization_file_path = first(filter(endswith("ensamblated_magnetization.csv"), readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)))
+
+       RFIM.plot_ensamblated_magnetization(RFIM.GRAPHS_DIR_SIMULATIONS, ensamblated_magnetization_file_path)
     end
 end
 
-function plot_trazes(ARGS)
+function plot(ARGS)
     #ARG[1] = true includes the ensamblated magnetization
-    arg1 = parse(Bool, ARGS[1])
+    arg = parse(Bool, ARGS[1])
 
-    plot(arg1)
+    __plot(arg)
 end
 
-plot_trazes(ARGS)
+plot(ARGS)

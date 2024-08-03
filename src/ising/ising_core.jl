@@ -23,10 +23,17 @@ function do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
     trans_dynamics::ISING_LATTICE_DYNAMICS = metropolis_dynamics)
     ising_model = IsingLattice(TEMP, N_GRID; flip_strategy = flip_strategy, 
     trans_dynamics = trans_dynamics)
-
-    str_temp = replace(string(round(TEMP, digits=2)), "." => "_") #stringified temperature with "." replaced by "_"
+    
     #= aux_dir = "../scripts/simulations_T_" * str_temp #folder containing simulations al temp str_temp  =#
-    aux_dir = create_dir(joinpath(SIMULATIONS_DIR,"simulations_T_"), sub_dir, str_temp)
+
+    if TEMP == CRITICAL_TEMP
+        str_temp = __format_str_float(CRITICAL_TEMP,6)
+        aux_dir = create_dir(joinpath(SIMULATIONS_DIR,"simulations_T_",), sub_dir, str_temp)
+    else
+        str_temp = __format_str_float(TEMP,6)
+        aux_dir = create_dir(joinpath(SIMULATIONS_DIR,"simulations_T_",), sub_dir, str_temp)         
+    end
+    
     create_dir(joinpath(aux_dir,"fourier"), sub_dir)
  
     #= Global magnetization time series realization will be saved on subdirectories over folder simultations=#
@@ -113,7 +120,8 @@ function do_simulations(arr::Vector{Float64}, N_GRID::Int64,
                     NUM_RUNS::Int64, NUM_GENERATIONS::Int64; 
                     include_Tc::Bool=false,
                     display_lattice::Bool=false,
-                    generate_rffts::Bool=false)
+                    generate_rffts::Bool=false,
+                    write_csv_ensamblated_magnetization::Bool=false)
     if include_Tc
         push!(arr, CRITICAL_TEMP)
         sort!(arr)
@@ -128,7 +136,12 @@ function do_simulations(arr::Vector{Float64}, N_GRID::Int64,
         do_model(rand_magn, temp, N_GRID, NUM_RUNS, NUM_GENERATIONS; display_lattice=display_lattice)
     end
 
+    if write_csv_ensamblated_magnetization
+        write_csv_ensamblated_magnetization_by_temprature(SIMULATIONS_DIR; statistic = mean)
+    end
+    
     if generate_rffts
         write_rffts(NUM_RUNS)
-    end 
+    end
+
 end

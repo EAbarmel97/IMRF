@@ -2,6 +2,7 @@ module RFIM
 using Base.Threads
 using LinearAlgebra
 using Statistics 
+using Printf
 
 using DataFrames, CSV, GLM
 using LaTeXStrings
@@ -23,9 +24,9 @@ include("plotting/plot_trazes.jl")
 include("utils/utilities.jl")
 include("utils/paths.jl")
 
-export do_simulations #ising_core exports
+export do_simulations #ising_core.jl exports
 
-export plot_traze, plot_trazes
+export plot_traze, plot_trazes, plot_ensamblated_magnetization  #plot_trazes.jl exports
 
-export DEFAULT_TEMPERATURE_ARRAY
+export DEFAULT_TEMPERATURE_ARRAY #utilities.jl exports
 end #end of module

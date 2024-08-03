@@ -146,7 +146,7 @@ end
 
 Plots all psd in log-log superimposed on a same canvas, highlighting the mean psd in red, and the linear fit as well
 """
-function plot_psd(temp_name_dir::AbstractString,destination_dir::AbstractString)
+function plot_psd(temp_name_dir::AbstractString, destination_dir::AbstractString)
     simuls_dir = determine_simulation_dir(destination_dir)
 
     create_graphs_temp_sub_dir(temp_name_dir,destination_dir)

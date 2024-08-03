@@ -3,22 +3,16 @@ include .env
 # Define the directory for the Julia environment
 JULIA_DEPOT_PATH := $(shell pwd)/.julenv
 
-DELETE_SIMULS := rm -rf simulations/* 
-UPDATE_PROJECT_TOML := cp $(JULIA_DEPOT_PATH)/Project.toml Project.toml
+DELETE_SIMULS_AND_GRAPHS := rm -rf simulations/*  && rm -rf graphs/simulations/*
 
-ICN_UPDATE_PROJECT_TOML := cp $(ICN_JULIA_DEPOT_PATH)/Project.toml Project.toml
+# Update Project.toml
+UPDATE_PROJECT_TOML := cp $(JULIA_DEPOT_PATH)/Project.toml Project.toml
 
 # Custom shell command to add a package from the environment and update Project.toml
 ADD_AND_UPDATE := julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.add("$(ARG)");' && $(UPDATE_PROJECT_TOML)
 
 # Custom shell command to remove a package from the environment and update Project.toml
 REMOVE_AND_UPDATE := julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.rm("$(ARG)");' && $(UPDATE_PROJECT_TOML)
-
-# Custom shell command to add a package from the environment and update Project.toml for ICN
-ICN_ADD_AND_UPDATE := $(ICN_JULIA_BIN) --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.add("$(ARG)");' && $(ICN_UPDATE_PROJECT_TOML)
-
-# Custom shell command to remove a package from the environment and update Project.toml for ICN
-ICN_REMOVE_AND_UPDATE := $(ICN_JULIA_BIN) --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.rm("$(ARG)");' && $(ICN_UPDATE_PROJECT_TOML)
 
 # Target to run Julia commands in the environment
 julia_env:
@@ -40,13 +34,16 @@ instantiate:
 precompile:
 	@julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.precompile()'
 
+# Target to simulate the RFIM
 simulate:
-	@julia --project=$(JULIA_DEPOT_PATH) main.jl $(ARGS)
+	@julia --project=$(JULIA_DEPOT_PATH) cli/simulate.jl $(ARGS)
 
+# Target to plot the trazes of the times series
 plot_trazes:
 	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_trazes.jl $(ARG)
 
+# Target to precompile packages in the environment
 cleanup:
-	@$(DELETE_SIMULS)
+	@$(DELETE_SIMULS_AND_GRAPHS)
 
 .PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate cleanup plot_trazes

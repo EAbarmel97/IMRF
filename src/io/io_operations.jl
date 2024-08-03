@@ -1,52 +1,5 @@
 @enum DIRS dir = 1 sub_dir = 2
 
-function load_data_matrix(::Type{T}, file_path::String; drop_header=false, centralize::Bool=false)::Matrix{T} where {T <: Any}
-    df = DataFrames.DataFrame(CSV.File(file_path; header=drop_header))
-    data = Matrix{T}(df)
-
-    if centralize
-        data .-= mean(data, dims=1)
-    end
-
-    return data
-end
-
-function write_to_csv(file_to_write::String, value::Any)
-    if !isfile(file_to_write)
-       @error "file $file_to_write does not exist"
-    end 
-
-    CSV.write(file_to_write, DataFrame(col1 = [value]); append = true)
-    return
-end
-
-function write_to_csv(file_to_write::String, value::Vector{<:Any})
-    if !isfile(file_to_write)
-       @error "file $file_to_write does not exist"
-    end 
-
-    CSV.write(file_to_write, DataFrame(col1 = value); append = true)
-    return
-end
-
-function write_rffts(num_runs::Int64)
-    #first two join abs path do not exist nor contain magnetization ts simulations
-    All_MAGNETIZATION_DIRS = joinpath.(readdir(abspath(SIMULATIONS_DIR), join=true),"magnetization")[3:end]
-    All_FOURIER_DIRS = joinpath.(readdir(abspath(SIMULATIONS_DIR), join=true),"fourier")[3:end]
-    for i in eachindex(All_MAGNETIZATION_DIRS)
-        for run in 1:num_runs
-            global_magn_ts_path = joinpath(All_MAGNETIZATION_DIRS[i],"global_magnetization_r$run.csv" )
-            rfft_path = create_file(joinpath(All_FOURIER_DIRS[i], "rfft_global_magnetization_r$run.csv"))
-            rfft_magnetiaztion_ts = FFTW.rfft(global_magn_ts_path)
-            write_rfft(rfft_magnetiaztion_ts, rfft_path)
-        end
-    end
-end
-
-function write_rfft(arr::Vector{ComplexF64}, file_path::String)
-    write_to_csv(file_path, arr)
-end
-
 function create_dir(dir_name::String, type_of_dict::DIRS, args...)::String
     dir_path::String = ""
     if type_of_dict === dir
@@ -77,4 +30,97 @@ function filter_directory_names(dir_names::Vector{String}, rgx::Regex)::Vector{S
     end
     
     return filtered_array
+end
+
+"""
+    load_data_matrix(::Type{T}, file_path::String; drop_header=false, centralize::Bool=false)::Matrix{T} where {T <: Any}
+
+Load data from a CSV file into a matrix of a specified type, with optional header removal and centralization.
+
+# Arguments
+- `::Type{T}`: The type of the elements in the resulting matrix.
+- `file_path::String`: The path to the CSV file to load.
+- `drop_header::Bool=false`: If `true`, the header row will be dropped. Default is `false`.
+- `centralize::Bool=false`: If `true`, the data will be centralized by subtracting the mean of each column. Default is `false`.
+
+# Returns
+- `Matrix{T}`: A matrix containing the data from the CSV file, with the specified type `T`.
+"""
+function load_data_matrix(::Type{T}, file_path::String; drop_header=false, centralize::Bool=false)::Matrix{T} where {T <: Any}
+    df = DataFrames.DataFrame(CSV.File(file_path; header=drop_header))
+    data = Matrix{T}(df)
+
+    if centralize
+        data .-= mean(data, dims=1)
+    end
+
+    return data
+end
+
+function write_to_csv(file_to_write::String, value::Any)
+    if !isfile(file_to_write)
+       @error "file $file_to_write does not exist"
+    end 
+
+    CSV.write(file_to_write, DataFrame(col1 = [value]); append = true, delim = ',')
+    return
+end
+
+function write_to_csv(file_to_write::String, value::Vector{<:Any})
+    if !isfile(file_to_write)
+       @error "file $file_to_write does not exist"
+    end 
+
+    CSV.write(file_to_write, DataFrame(col1 = value); append = true, delim = ',')
+    return
+end
+
+function write_rffts(num_runs::Int64)
+    #check if ensamblated_magnetization csv exists
+    if filter(endswith(".csv"),readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
+        All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
+    else
+        All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
+    end  
+
+    All_MAGNETIZATION_DIRS = joinpath.(All_SIMULATIONS_DIRS, "magnetization")
+    All_FOURIER_DIRS = joinpath.(All_SIMULATIONS_DIRS, "fourier")
+    for i in eachindex(All_MAGNETIZATION_DIRS)
+        for run in 1:num_runs
+            global_magn_ts_path = joinpath(All_MAGNETIZATION_DIRS[i],"global_magnetization_r$run.csv" )
+            rfft_path = create_file(joinpath(All_FOURIER_DIRS[i], "rfft_global_magnetization_r$run.csv"))
+            rfft_magnetiaztion_ts = FFTW.rfft(global_magn_ts_path)
+            write_rfft(rfft_magnetiaztion_ts, rfft_path)
+        end
+    end
+end
+
+function write_rfft(arr::Vector{ComplexF64}, file_path::String)
+    write_to_csv(file_path, arr)
+end
+
+function write_csv_ensamblated_magnetization_by_temprature(write_to::String; statistic::Function = mean)
+    #this gets an array of dirs with the structure: ../simulations/simulations_T_xy_abcdefg_/
+    All_TEMPERATURES_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
+
+    All_MAGNETIZATION_DIRS = joinpath.(readdir(abspath(SIMULATIONS_DIR), join=true),"magnetization")[3:end]
+
+    temperatures = Float64[]
+    magnetizations = Float64[]
+
+    for i in eachindex(All_MAGNETIZATION_DIRS)
+       temperature = parse(Float64,
+                           replace(
+                           match(r"[0-9][0-9]_[0-9]+", 
+                           All_MAGNETIZATION_DIRS[i]).match, 
+                           "_" => ".")
+                        )
+
+       magnetization = sample_magnetization_by_run(All_TEMPERATURES_DIRS[i]; statistic = statistic)
+       push!(magnetizations ,magnetization)
+       push!(temperatures,temperature)
+    end    
+    
+    ensamblated_magnetization_file_path = create_file(joinpath(write_to, "$(statistic)_ensamblated_magnetization.csv"))
+    CSV.write(ensamblated_magnetization_file_path, DataFrame(t = temperatures, M_n = magnetizations); append= true, delim=',')
 end

@@ -1,23 +1,3 @@
-module SVD
-using LinearAlgebra
-using Statistics 
-using Base.Threads
-
-using Plots
-using LaTeXStrings
-
-include("../fourier/CorrelatedNoise.jl")
-using .CorrelatedNoise: correlated_noise_generator
-
-include("../utils/paths.jl")
-
-include("../fourier/FourierAnalysis.jl")
-using .FourierAnalysis: intercept_and_exponent_from_log_psd
-
-export create_ts_matrix, centralize_matrix, plot_eigen_spectrum, write_beta_beta_fit, read_beta_beta_fit, plot_beta_beta_fit, average_eigen_spectrum, BETA_BETA_FIT_FILE_PATH
-
-const BETA_BETA_FIT_FILE_PATH  = joinpath(REPO_DIR, "beta_beta_fit.txt")
-
 function pad_vector(array::Vector{T}, co_dim::Int64)::Vector{T} where {T <: Real}
     return vcat(array,zeros(T,co_dim))
 end
@@ -90,36 +70,6 @@ function _create_eigenspectrum_plot_file_path(dir_to_save,beta::Float64)
     file_name = replace("eigenspectrum_beta_$(round(beta,digits=3))", "." => "_") * ".pdf"
     return joinpath(dir_to_save,file_name)
 end
-
-"""
-   create_beta_beta_fit_file()
-
-Create a .txt file where the beta and beta fit will be written; When created it also writes the headers of the file
-"""
-function _create_beta_beta_fit_file()
-    if !isfile(BETA_BETA_FIT_FILE_PATH)
-        touch(BETA_BETA_FIT_FILE_PATH) 
-        #writes headers to file one it is created
-        open(BETA_BETA_FIT_FILE_PATH,"a+") do io
-            write(io,"beta,beta_fit\n")
-        end    
-    end
-end
-
-
-function _write_beta_beta_fit_to_file(full_file_path::String,beta::Float64,beta_fit::Float64;is_eof::Bool=true)
-    value_to_write = "$(beta),$(beta_fit)"
-    if is_eof
-        open(full_file_path,"a+") do io
-            write(io, value_to_write)
-        end 
-    else
-        open(full_file_path,"a+") do io
-            write(io,value_to_write * "\n")
-        end    
-    end      
-end
-
 
 """
     write_beta_beta_fit(from_beta::Float64, to_beta::Float64, num_of_betas::Int)
@@ -205,11 +155,6 @@ function compute_eigenvals_from_beta_generated_noise(beta::Float64; number_of_re
     return eigvals
 end
 
-function compute_eigenspectrum_length(beta::Float64; number_of_realizations=10::Int,number_of_observations=1000::Int)::Int64
-    eigvals = compute_eigenvals_from_beta_generated_noise(beta; number_of_realizations=number_of_realizations,number_of_observations=number_of_observations)
-    return length(eigvals)
-end
-
 """
    plot_eigen_spectrum(dir_to_save::String, M::Matrix{Float64})
 
@@ -241,62 +186,6 @@ function _plot_eigen_spectrum(dir_to_save::String, eigvals::Array{Float64,1},bet
 end
 
 function plot_eigen_spectrum(dir_to_save::String,M::Matrix{Float64},beta::Float64)
-    eigvals = compute_eigvals(M)
+     eigvals = compute_eigvals(M)
     _plot_eigen_spectrum(dir_to_save,eigvals,beta)
 end
-
-
-"""
-   plot_beta_beta_fit(file_path::String)
-
-Persists a graph of the beta vs beta fit is a given dir
-"""
-function plot_beta_beta_fit(file_path::String)
-
-    beta_array, beta_fit_array = read_beta_beta_fit(file_path)
-    
-    beta_beta_fit_plot_file_path = joinpath(AUTOMATED_EIGEN_SEPCTRUM_GRAPHS_DIR,"beta_vs_beta_fit.pdf")
-
-    if !isfile(beta_beta_fit_plot_file_path)
-        #plot styling
-        x = collect(1:length(beta_array))
-        plt = plot(x,[beta_array, beta_fit_array],label=["beta" "beta_fit"], seriestype=:scatter,alpha=0.5)
-        #linear fit
-        plot!(u -> u, minimum(x), maximum(x),label="id",lc=:black)
-        
-        title!("beta vs beta_fit, beta from $(beta_array[1]) to $(beta_array[end])")
-
-        #file saving
-        savefig(plt, beta_beta_fit_plot_file_path)
-    end
-end
-
-"""
-   plot_beta_beta_fit(file_path::String)
-
-Persists a graph of the beta vs beta fit is a given dir
-"""
-function plot_beta_beta_fit(func::Function; file_path::String=BETA_BETA_FIT_FILE_PATH)
-    axes = _create_ploting_axes(func(file_path)...)
-
-    beta_beta_fit_plot_file_path = joinpath(AUTOMATED_EIGEN_SEPCTRUM_GRAPHS_DIR,"beta_vs_beta_fit.pdf")
-
-    if !isfile(beta_beta_fit_plot_file_path)
-        #plot styling
-        plt = plot(axes[1],axes[2],label=["beta" "beta_fit"], seriestype=:scatter,alpha=0.5)
-        #linear fit
-        plot!(u -> u,label="id",lc=:black)
-        
-        title!("beta vs beta_fit, beta from $(axes[1][1]) to $(axes[1][end])")
-
-        #file saving
-        savefig(plt, beta_beta_fit_plot_file_path)
-    end
-end
-
-end #end of module
-
-
-
-
-

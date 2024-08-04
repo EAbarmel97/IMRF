@@ -7,7 +7,7 @@ function __plot(plot_ensamble_magnetization::Bool=false)
     if plot_ensamble_magnetization
        ensamblated_magnetization_file_path = first(filter(endswith("ensamblated_magnetization.csv"), readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)))
 
-       RFIM.plot_ensamblated_magnetization(RFIM.GRAPHS_DIR_SIMULATIONS, ensamblated_magnetization_file_path)
+       RFIM.plot_ensamblated_magnetization(ensamblated_magnetization_file_path, RFIM.GRAPHS_DIR_SIMULATIONS)
     end
 end
 

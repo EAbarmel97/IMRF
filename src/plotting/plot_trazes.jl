@@ -54,16 +54,28 @@ function plot_trazes(statistic::Function = mean)
     end    
 end
 
+
+"""
+    plot_ensamblated_magnetization(emsamblated_magnetization_file_path::String, save_to::String)
+
+Plots the magnetization data from a given file and saves the plot as a PDF.
+
+# Arguments
+- `emsamblated_magnetization_file_path::String`: The file path to the ensambled magnetization data. The file is expected to contain a matrix where the first column represents temperature and the second column represents magnetization.
+- `save_to::String`: The directory path where the generated plot will be saved.
+"""
 function plot_ensamblated_magnetization(emsamblated_magnetization_file_path::String, save_to::String)
-    magnetization_data = load_data_matrix(Float64, emsamblated_magnetization_file_path::String; drop_header=false, centralize=false)
+    magnetization_data = load_data_matrix(Float64, ensamblated_magnetization_file_path::String; drop_header=false, centralize=false)
     
-    if isfile(file_path)
-        plt = plot(magnetization_data[1], magnetization_data[2], label = L"\overline{M}_n")
+    #split magnetization_data matrix into a temperature column and magnetization column
+    cols_magnetization_data = eachcol(magnetization_data)
+    if isfile(emsamblated_magnetization_file_path)
+        plt = plot(cols_magnetization_data[1], cols_magnetization_data[2], label = L"\overline{M}_n")
         ylims!(0.0, 1.0)
         xlims!(0,max(magnetization_data[1]))
         vline!(plt, [CRITICAL_TEMP, CRITICAL_TEMP], label=L"T_c", linewidth=1, fillalpha=0.02)
         xlabel!(L"T")
         ylabel!("spontaneus magnetization")
-        savefig(plt,joinpath(save_to, "ensamblated_magnetization.pdf")) #saving plot reference as a file with pdf extension at a given directory 
+        savefig(plt,joinpath(save_to, "ensamblated_magnetization.pdf"))
     end
 end

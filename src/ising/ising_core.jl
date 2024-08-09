@@ -25,7 +25,6 @@ function do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
     ising_model = IsingLattice(TEMP, N_GRID; flip_strategy = flip_strategy, trans_dynamics = trans_dynamics)
     
     #= aux_dir = "../scripts/simulations_T_" * str_temp #folder containing simulations al temp str_temp  =#
-
     if TEMP == CRITICAL_TEMP
         str_temp = __format_str_float(CRITICAL_TEMP,6)
         aux_dir = create_dir(joinpath(SIMULATIONS_DIR,"simulations_T_",), sub_dir, str_temp)
@@ -116,12 +115,15 @@ and generating random Fourier transforms.
 - `display_lattice::Bool=false`: If `true`, the lattice will be displayed during the simulations.
 - `generate_rffts::Bool=false`: If `true`, random Fourier transforms will be generated and saved after the simulation runs.
 """
-function do_simulations(arr::Vector{Float64}, N_GRID::Int64, 
-                    NUM_RUNS::Int64, NUM_GENERATIONS::Int64; 
-                    include_Tc::Bool=false,
-                    display_lattice::Bool=false,
-                    generate_rffts::Bool=false,
-                    write_csv_ensamblated_magnetization::Bool=false)
+function do_simulations(arr::Vector{Float64}, 
+                       N_GRID::Int64, 
+                       NUM_RUNS::Int64, 
+                       NUM_GENERATIONS::Int64; 
+                       include_Tc::Bool=false,
+                       display_lattice::Bool=false,
+                       generate_rffts::Bool=false,
+                       write_csv_ensamblated_magnetization::Bool=false
+                       )
     if include_Tc
         push!(arr, CRITICAL_TEMP)
         sort!(arr)

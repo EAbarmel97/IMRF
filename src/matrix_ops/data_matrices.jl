@@ -1,5 +1,26 @@
-function pad_vector(array::Vector{T}, co_dim::Int64)::Vector{T} where {T <: Real}
-    return vcat(array,zeros(T,co_dim))
+"""
+    load_data_matrix(::Type{T}, file_path::String; drop_header=false, centralize::Bool=false)::Matrix{T} where {T <: Any}
+
+Load data from a CSV file into a matrix of a specified type, with optional header removal and centralization.
+
+# Arguments
+- `::Type{T}`: The type of the elements in the resulting matrix.
+- `file_path::String`: The path to the CSV file to load.
+- `drop_header::Bool=false`: If `true`, the header row will be dropped. Default is `false`.
+- `centralize::Bool=false`: If `true`, the data will be centralized by subtracting the mean of each column. Default is `false`.
+
+# Returns
+- `Matrix{T}`: A matrix containing the data from the CSV file, with the specified type `T`.
+"""
+function load_data_matrix(::Type{T}, file_path::String; drop_header=false, centralize::Bool=false)::Matrix{T} where {T <: Any}
+    df = DataFrames.DataFrame(CSV.File(file_path; header=drop_header, delim=',', types = T))
+    data = Matrix{T}(df)
+
+    if centralize
+        data .-= mean(data, dims=1)
+    end
+
+    return data
 end
 
 """
@@ -35,36 +56,4 @@ function ts_data_matrix(temperature_dir::String, number_of_realizations::Int; ce
     end
     
     return M = hcat(corr_noises_arr...)' #build data matrix from different realizations
-end
-
-function centralize_matrix(M::Matrix{Float64})::Matrix{Float64}
-    mean_by_row = mean.(eachrow(M)) 
-    return M .- mean_by_row
-end
-
-"""
-   filter_singular_vals_array(atol::Float64,M::Matrix{Float64})
-
-Returns an array of singular valuesfiltered by absulte tolerance
-"""
-function filter_singular_values(singularvals::Vector{Float64};atol=eps(Float64))::Float64
-    return filter(u -> u > atol, singularvals)
-end
-
-function compute_filtered_eigvals!(M::Matrix{Float64}; drop_first::Bool = true, atol::Float64 = eps(Float64))::Vector{Float64}
-    singularvals = svd(M).S  
-
-    if drop_first 
-        return abs2.(filter_singular_values(singularvals; atol = atol))[2:end]
-    end
-    
-    return abs2.(filter_singular_vals_array(singularvals; atol = atol))
-end
-
-function linear_fit_log_eigspectrum(eigspectrum::Vector{Float64})::Vector{Float64}
-    log10_rank = log10.(collect(Float64, 1:length(eigspectrum)))
-    log10_eigspectrum = log10.(eigspectrum)
-    beta0, beta1 = intercept_and_exponent(log10_rank, log10_eigspectrum)
-
-    return [beta0, beta1]
 end

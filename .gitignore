@@ -1,10 +1,17 @@
+#julia project
 **/src/Manifest.toml 
 **/src/Project.toml
 .julenv
+
+#simulations/
 simulations/simulations_T_*
 simulations/rfim_details.txt
-graphs/psd/**
-graphs/simulations/**
+
+#graphs/ 
+graphs/psd/simulations/simulations_T_*
+graphs/simulations/simulations_T_*
 simulations/*.csv
+
+#vscode settings
 .vscode
 .env

@@ -24,13 +24,14 @@ include("plotting/plot_trazes.jl")
 include("utils/utilities.jl")
 include("utils/paths.jl")
 
+include("matrix_ops/data_matrices.jl")
 include("matrix_ops/svd.jl")
 
 export do_simulations #ising_core.jl exports
 
-export plot_traze, plot_trazes, plot_psd, plot_ensamblated_magnetization  #plot_trazes.jl exports
+export plot_traze, plot_trazes, plot_psd, plot_ensamblated_magnetization, plot_  #plot_trazes.jl exports
 
 export DEFAULT_TEMPERATURE_ARRAY #utilities.jl exports
 
-export ts_data_matrix #svd exports
+export ts_data_matrix #data_matrices.jl exports
 end #end of module

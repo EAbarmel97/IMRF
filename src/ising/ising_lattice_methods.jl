@@ -257,7 +257,7 @@ function do_generation(ising_lattice::IsingLattice)
         fliping_order = ising_lattice.flip_order
         for temp in 1:ising_lattice.ncells
             i = mod1(rand(Int), ising_lattice.ncells - temp + 1 ) + temp - 1 
-            utilities.swap!(temp,i,fliping_order)
+            swap!(temp,i,fliping_order)
         end
         
         setfield!(ising_lattice,:flip_order, fliping_order)

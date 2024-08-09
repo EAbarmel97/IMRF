@@ -25,6 +25,14 @@ function __format_str_float(f::Float64,decimal_places::Int64)::String
     return @sprintf("%02d_%d", integer_part, decimal_part)
 end
 
+function Base.parse(str::String)::Float64
+    if !contains(str, r"[0-9][0-9]_[0-9]+")
+       @error "error ocurred while parsing $(str)"
+    end 
+
+    return parse(Float64,replace(match(r"[0-9][0-9]_[0-9]+", str).match, "_" => "."))
+end
+
 #= Function to push fill in values in arithmetic progression on an array given the end points=#
 function __push_arith_progression!(Ti::Float64, Tf::Float64, delta::Float64, arr::AbstractArray)
     val = cld(Tf-Ti,delta)
@@ -37,7 +45,7 @@ function __push_arith_progression!(Ti::Float64, Tf::Float64, delta::Float64, arr
             push!(arr,new_val) 
         end  
     else
-        throw(ErrorException("Illegal choice. $Tf is not in arithmetic progression with respect~ to $Ti"))
+        throw(ErrorException("Ilegal choice. $Tf is not in arithmetic progression with respect~ to $Ti"))
     end  
 end
 
@@ -56,7 +64,7 @@ end
 const DEFAULT_TEMPERATURE_ARRAY = default_temperature_array()
 
 """
-    sample_magnetization_by_run(temperature_dir::String, statistic::Function = mean)::Float64
+    sample_magnetization_by_run(temperature_dir::String; statistic::Function = mean)::Float64
 
 Calculate a statistical measure of magnetization from data files in a given directory.
 
@@ -87,4 +95,9 @@ function sample_magnetization_by_run(temperature_dir::String; statistic::Functio
     end
     
     return statistic(magnetization_per_run)
+end
+
+function intercept_and_exponent(x::Vector{Float64}, y::Vector{Float64})::Vector{Float64}
+    data = DataFrame(X=x,Y=y)
+    return GLM.coef(GLM.lm(@formula(Y ~ X), data))
 end

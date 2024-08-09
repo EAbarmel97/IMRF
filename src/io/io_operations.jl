@@ -47,7 +47,7 @@ Load data from a CSV file into a matrix of a specified type, with optional heade
 - `Matrix{T}`: A matrix containing the data from the CSV file, with the specified type `T`.
 """
 function load_data_matrix(::Type{T}, file_path::String; drop_header=false, centralize::Bool=false)::Matrix{T} where {T <: Any}
-    df = DataFrames.DataFrame(CSV.File(file_path; header=drop_header))
+    df = DataFrames.DataFrame(CSV.File(file_path; header=drop_header, delim=',', types = T))
     data = Matrix{T}(df)
 
     if centralize
@@ -77,12 +77,12 @@ end
 
 function write_rffts(num_runs::Int64)
     #check if ensamblated_magnetization csv exists
-    if filter(endswith(".csv"),readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
+    if filter((u) -> endswith(u, ".csv"), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
         All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
     else
         All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
-    end  
-
+    end 
+    
     All_MAGNETIZATION_DIRS = joinpath.(All_SIMULATIONS_DIRS, "magnetization")
     All_FOURIER_DIRS = joinpath.(All_SIMULATIONS_DIRS, "fourier")
     for i in eachindex(All_MAGNETIZATION_DIRS)
@@ -102,14 +102,12 @@ end
 function write_csv_ensamblated_magnetization_by_temprature(write_to::String; statistic::Function = mean)
     #this gets an array of dirs with the structure: ../simulations/simulations_T_xy_abcdefg_/
     All_TEMPERATURES_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
-
-    All_MAGNETIZATION_DIRS = joinpath.(readdir(abspath(SIMULATIONS_DIR), join=true),"magnetization")[3:end]
-
+    All_MAGNETIZATION_DIRS = joinpath.(All_TEMPERATURES_DIRS, "magnetization")
     temperatures = Float64[]
     magnetizations = Float64[]
 
     for i in eachindex(All_MAGNETIZATION_DIRS)
-       temperature = parse(Float64,
+        temperature = parse(Float64,
                            replace(
                            match(r"[0-9][0-9]_[0-9]+", 
                            All_MAGNETIZATION_DIRS[i]).match, 
@@ -123,4 +121,13 @@ function write_csv_ensamblated_magnetization_by_temprature(write_to::String; sta
     
     ensamblated_magnetization_file_path = create_file(joinpath(write_to, "$(statistic)_ensamblated_magnetization.csv"))
     CSV.write(ensamblated_magnetization_file_path, DataFrame(t = temperatures, M_n = magnetizations); append= true, delim=',')
+end
+
+function __count_lines_in_csv(file_path::String)
+    n::Int64 = 0
+    for _ in CSV.Rows(file_path; header=false, reusebuffer=true)
+        n += 1
+    end
+
+    return n
 end

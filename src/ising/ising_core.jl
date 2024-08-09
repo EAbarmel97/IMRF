@@ -18,11 +18,11 @@ Performs simulations of the Ising model with specified parameters, initializing 
 - `trans_dynamics::ISING_LATTICE_DYNAMICS=metropolis_dynamics`: Dynamics model for transitions (e.g., `metropolis_dynamics`).
 """
 function do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
-    display_lattice::Bool=false,
-    flip_strategy::ISING_LATTICE_STRATEGY = random_strategy,
-    trans_dynamics::ISING_LATTICE_DYNAMICS = metropolis_dynamics)
-    ising_model = IsingLattice(TEMP, N_GRID; flip_strategy = flip_strategy, 
-    trans_dynamics = trans_dynamics)
+                  display_lattice::Bool=false,
+                  flip_strategy::ISING_LATTICE_STRATEGY = random_strategy,
+                  trans_dynamics::ISING_LATTICE_DYNAMICS = metropolis_dynamics)
+
+    ising_model = IsingLattice(TEMP, N_GRID; flip_strategy = flip_strategy, trans_dynamics = trans_dynamics)
     
     #= aux_dir = "../scripts/simulations_T_" * str_temp #folder containing simulations al temp str_temp  =#
 
@@ -137,11 +137,10 @@ function do_simulations(arr::Vector{Float64}, N_GRID::Int64,
     end
 
     if write_csv_ensamblated_magnetization
-        write_csv_ensamblated_magnetization_by_temprature(SIMULATIONS_DIR; statistic = mean)
+       write_csv_ensamblated_magnetization_by_temprature(SIMULATIONS_DIR; statistic = mean)
     end
     
     if generate_rffts
         write_rffts(NUM_RUNS)
     end
-
 end

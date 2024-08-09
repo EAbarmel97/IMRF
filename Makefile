@@ -3,7 +3,9 @@ include .env
 # Define the directory for the Julia environment
 JULIA_DEPOT_PATH := $(shell pwd)/.julenv
 
-DELETE_SIMULS_AND_GRAPHS := rm -rf simulations/*  && rm -rf graphs/simulations/*
+DELETE_SIMULS := rm -rf simulations/*
+
+DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/*
 
 # Update Project.toml
 UPDATE_PROJECT_TOML := cp $(JULIA_DEPOT_PATH)/Project.toml Project.toml
@@ -42,8 +44,15 @@ simulate:
 plot_trazes:
 	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_trazes.jl $(ARG)
 
-# Target to precompile packages in the environment
-cleanup:
-	@$(DELETE_SIMULS_AND_GRAPHS)
+# Target to plot the trazes of the times series
+plot_psd:
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_psd.jl
 
-.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate cleanup plot_trazes
+# Target to precompile packages in the environment
+cleanup_simulations:
+	@$(DELETE_SIMULS)
+
+cleanup_graphs:
+	@$(DELETE_GRAPHS)
+
+.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate plot_trazes plot_psd cleanup_simulations cleanup_graphs

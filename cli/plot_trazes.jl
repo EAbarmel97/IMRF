@@ -2,10 +2,12 @@ include("../src/RFIM.jl")
 using .RFIM: plot_trazes, plot_ensamblated_magnetization
 
 function __plot(plot_ensamble_magnetization::Bool=false)
+    println("plotting trazes, wait ...\n")
     RFIM.plot_trazes()
 
     if plot_ensamble_magnetization
-       ensamblated_magnetization_file_path = first(filter(endswith("ensamblated_magnetization.csv"), readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)))
+       ensamblated_magnetization_file_path = first(filter((u) -> endswith(u,"ensamblated_magnetization.csv"), 
+                                                    readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)))
 
        RFIM.plot_ensamblated_magnetization(ensamblated_magnetization_file_path, RFIM.GRAPHS_DIR_SIMULATIONS)
     end

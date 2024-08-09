@@ -1,40 +1,65 @@
+"""
+    plot_psd()
 
-function plot_rffts()
-    #writing under each simulations_T_x_y_z/fourier/ dir the rfft at each run and plotting the psd
-    for i in eachindex(ALL_SIMULATIONS_DIRS)
-        # array of strings has generic strings of the the type: simulations_T_x_y_z
-        simul_dir_name = ALL_AUTOMATED_SIMULS_DIRS[i]
-        simul_sub_dir = replace(ALL_AUTOMATED_SIMULS_DIRS[i], "simulations_" => "")
+Generates and saves PSD plots for all simulation directories within the SIMULATIONS_DIR directory.
+"""
+function plot_psd()
+    #check if ensamblated_magnetization csv exists
+    if filter((u) -> endswith(u,".csv"), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
+        All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
+    else
+        All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
+    end 
+    
+    for i in eachindex(All_SIMULATIONS_DIRS)
+        str_simulation_temp = match(r"simulations_T_[0-9][0-9]_[0-9]+", All_SIMULATIONS_DIRS[i]).match
+        psd_plot_dir = create_dir(joinpath(PSD_GRAPHS_SIMULATIONS, str_simulation_temp), sub_dir)
 
-        for run in 1:NUM_RUNS
-            #= 
-            global magnetization with initial temperature T_x_y_z s is under the directory 
-            ../automated/simulations_T_x_y_z/magnetization/global_magnetization_rW.txt 
-            =#
-            global_magn_ts_path = joinpath(ALL_GLOBAL_MAGN_DIRS[i], readdir(ALL_GLOBAL_MAGN_DIRS[i])[run])
-            #temperature is taken from simulations dir name 
-            str_temp = replace(simul_dir_name, "simulations_T_" => "", "_" => ".")
-
-            #dir where rfft will be saved
-            fourier_dir = joinpath(AUTOMATED_SIMULS_DIR, ALL_AUTOMATED_SIMULS_DIRS[i], "fourier/")
-            rfft_path = joinpath(fourier_dir, "rfft_global_magnetization_$(str_temp)_r$run.txt")
-
-            #if strigified rfft file doesn't exist at dir ../automated/simulations_T_x_y_z/fourier/
-            if !isfile(rfft_path)
-                #rfft is computed from .txt files containing the global magnetization time series
-                rfft = rfft(global_magn_ts_path)
-                temp = parse(Float64, str_temp)
-                #rfft is saved  as a .txt in ../automated/simulations_T_x_y_z/fourier/
-                rfft_conf = RFFTConfig(fourier_dir, temp, run)
-                write_rfft(rfft, rfft_conf)
-            end
-        end
-
-        psd_plot_file_name = "psd_$(simul_sub_dir)_r_1_$(NUM_RUNS).pdf"
-        psd_plot_file_abs_path = joinpath(AUTOMATED_PSD_GRAPHS_SIMULS, psd_plot_file_name)
-
-        if !isfile(psd_plot_file_abs_path)
-            plot_psd(simul_dir_name, AUTOMATED_PSD_GRAPHS_SIMULS)
-        end
+        plot_mean_psd_by_run(All_SIMULATIONS_DIRS[i], psd_plot_dir)
     end
 end
+
+"""
+    plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
+
+Plots and saves the mean Power Spectral Density (PSD) for the given temperature directory.
+
+# Arguments
+- `temperature_dir`: Directory with temperature data and Fourier files.
+- `destination_dir`: Directory to save the PSD plot.
+"""
+function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
+    if isempty(readdir(joinpath(abspath(temperature_dir), "fourier"), join=true))
+       @error " impossible to plot PSD. There are no rfts under '$(temperature_dir)/fourier'"
+       return
+    end
+
+    RFFTS_CSVS_INSIDE_TEMPERATURE_DIR = readdir(joinpath(abspath(temperature_dir), "fourier"), join=true)
+
+    mean_psd_array = mean_psd_by_run(temperature_dir) 
+    f = FFTW.rfftfreq(temperature_dir)
+
+    f_without_DC = f[2:end]
+    average_array_without_DC = mean_psd_array[2:end]
+
+    params = linear_fit_log_psd(f_without_DC, average_array_without_DC)
+    
+    temperature = parse(temperature_dir)
+    num_runs = RFFTS_CSVS_INSIDE_TEMPERATURE_DIR |> length
+    
+    plot_file_path = joinpath(destination_dir, "psd_$(match(r"T_[0-9][0-9]_[0-9]+",temperature_dir).match)_r_1_$(num_runs).pdf")
+
+    if !isfile(plot_file_path)
+        plt = plot(f_without_DC, average_array_without_DC, label=L"PSD \ \left( f \right)", xscale=:log10, yscale=:log10,lc=:red)
+        #linear fit
+        plot!((x) -> exp10(params[1] + params[2]*log10(x)), minimum(f_without_DC), maximum(f_without_DC), xscale=:log10, yscale=:log10, lc=:black)
+        #
+        title!("mean PSD by run, temp = $(round(temperature, digits=4))")
+        xlabel!(L"f")
+        ylabel!("power density spectrum")
+        
+        #file saving
+        savefig(plt, plot_file_path)
+    end        
+end
+

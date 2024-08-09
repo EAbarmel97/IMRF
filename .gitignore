@@ -4,7 +4,7 @@
 simulations/simulations_T_*
 simulations/rfim_details.txt
 graphs/psd/*
-graphs/simulations/simulations_T_*
+graphs/simulations/*
 simulations/*.csv
 .vscode
 .env

@@ -16,7 +16,7 @@ ICN_REMOVE_AND_UPDATE := $(ICN_JULIA_BIN) --project=$(JULIA_DEPOT_PATH) -e 'usin
 
 DELETE_SIMULS := rm -rf simulations/*
 
-DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/*
+DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/* && rm -rf graphs/eigspectra/*
 
 # Target to run Julia commands in the ICN environment
 julia_env:
@@ -50,6 +50,9 @@ plot_trazes:
 plot_psd:
 	@$(ICN_JULIA_BIN) --project=$(JULIA_DEPOT_PATH) cli/plot_psd.jl
 
+plot_eigspectra:
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(ARGS)
+
 # Target to precompile packages in the environment
 cleanup_simulations:
 	@$(DELETE_SIMULS)
@@ -57,4 +60,4 @@ cleanup_simulations:
 cleanup_graphs:
 	@$(DELETE_GRAPHS)
 
-.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate plot_trazes plot_psd cleanup_simulations cleanup_graphs
+.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate plot_trazes plot_psd plot_eigspectra cleanup_simulations cleanup_graphs

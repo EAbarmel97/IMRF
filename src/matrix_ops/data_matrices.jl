@@ -55,5 +55,5 @@ function ts_data_matrix(temperature_dir::String, number_of_realizations::Int; ce
         push!(realizations, magnetization)
     end
     
-    return M = hcat(corr_noises_arr...)' #build data matrix from different realizations
+    return M = hcat(realizations...)' #build data matrix from different realizations
 end

@@ -6,11 +6,12 @@
 #simulations/
 simulations/simulations_T_*
 simulations/rfim_details.txt
+simulations/*.csv
 
 #graphs/ 
 graphs/psd/simulations/simulations_T_*
 graphs/simulations/simulations_T_*
-simulations/*.csv
+graphs/eigspectra/*
 
 #vscode settings
 .vscode

@@ -23,13 +23,62 @@ function rfim_info(N_GRID,NUM_RUNS,NUM_GENERATIONS)
     end
 end
 
-function filter_directory_names(dir_names::Vector{String}, rgx::Regex)::Vector{String}
-    filtered_array = filter(str -> contains(str, rgx), dir_names)
-    if isempty(filtered_array)
-        throw(ErrorException("Impossible to graph the given array of temperatures!"))
+function simulations_dir(dir::String)
+    All_SIMULATIONS_DIRS = String[]
+    if isequal(abspath(dir),SIMULATIONS_DIR)
+        if filter((u) -> endswith(u, ".csv"), readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)) |> length > 0
+            All_SIMULATIONS_DIRS = readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)[4:end]
+        else
+            All_SIMULATIONS_DIRS = readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)[3:end]
+        end
+
+        return All_SIMULATIONS_DIRS
+    else
+        return dir
     end
-    
-    return filtered_array
+end
+
+"""
+    filter_dir_names_in_dir(dir::String, rgxs::Vararg{Regex})::Vector{String}
+
+Filters and returns a vector of directory names in the specified directory (`dir`) that match any of the given regular expressions (`rgxs`).
+
+# Arguments
+- `dir::String`: The path to the directory to search in.
+- `rgxs::Vararg{Regex}`: One or more regular expressions to match directory names against.
+
+# Returns
+- `Vector{String}`: A vector of directory names that match any of the provided regular expressions.
+
+# Notes
+- If `dir` is equal to `SIMULATIONS_DIR`, it first filters out directories containing `.csv` files, and then excludes the first few entries in the list.
+- Issues a warning if no directories match a given regular expression.
+"""
+function filter_dir_names_in_dir(dir::String, rgxs::Vararg{Regex})::Vector{String}
+    dir_paths_array = String[]
+    dirs_to_search_in = String[]
+
+    if isequal(abspath(dir), SIMULATIONS_DIR)
+        if filter((u) -> endswith(u, ".csv"), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
+            dirs_to_search_in = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
+        else
+            dirs_to_search_in = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
+        end
+    else
+        dirs_to_search_in = readdir(abspath(dir), join=true)
+    end
+
+    for rgx in rgxs
+        dir_paths = filter(dir_name -> contains(dir_name, rgx), dirs_to_search_in)
+        if isempty(dir_paths)
+            @warn "there is no sub dir in $(dir) matching '$(rgx)'"
+        else
+            first_match = dir_paths |> first
+            push!(dir_paths_array, first_match)
+        end
+    end
+
+    return dir_paths_array
 end
 
 function write_to_csv(file_to_write::String, value::Any)
@@ -105,4 +154,13 @@ function __count_lines_in_csv(file_path::String)
     end
 
     return n
+end
+
+function num_runs_rfim_details()::Int64
+    if !isfile(joinpath(SIMULATIONS_DIR),"rfim_details.txt")
+      @error "$(SIMULATIONS_DIR)/rfim_details.txt does not exit. Impossible to parse Int64"
+    end 
+
+    return parse(Int64, 
+           replace(match(r"nruns:[0-9]+", read(joinpath(SIMULATIONS_DIR ,"rfim_details.txt"), String)).match, "nruns:" => ""))
 end

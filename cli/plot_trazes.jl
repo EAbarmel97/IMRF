@@ -1,5 +1,6 @@
 include("../src/RFIM.jl")
 using .RFIM: plot_trazes, plot_ensamblated_magnetization
+using .RFIM: SIMULATIONS_DIR
 
 function __plot(plot_ensamble_magnetization::Bool=false)
     println("plotting trazes, wait ...\n")

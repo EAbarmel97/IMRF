@@ -10,6 +10,9 @@ Julia implementation of the 2D Random Field Ising Model.
  
  4. Run `make plot_trazes ARG="x"`. With x being true of false. If "true" the plot of the ensambled magnetization is saved under graphs/simulations
 
- 5. Run `make plot_psd` to save alls the average PSD by run at each fixed temp.
+ 5. Run `make plot_psd` to save all the average PSD by run at each fixed temperature.
 
- 6. To clean the "workspace" run `make cleanup_simulations && make cleanup_graphs`.
+ 6. Given `r`: number of realization and an array of patterns (suppose those are `pattern1, pattern2, pattern3`). Run `make plot_eigspectra ARGS="r pattern1 pattern2 pattern3"`
+
+ 7. To clean the "workspace" run `make cleanup_simulations && make cleanup_graphs`.
+

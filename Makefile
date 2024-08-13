@@ -5,7 +5,7 @@ JULIA_DEPOT_PATH := $(shell pwd)/.julenv
 
 DELETE_SIMULS := rm -rf simulations/*
 
-DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/*
+DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/* && rm -rf graphs/eigspectra/*
 
 # Update Project.toml
 UPDATE_PROJECT_TOML := cp $(JULIA_DEPOT_PATH)/Project.toml Project.toml
@@ -48,6 +48,9 @@ plot_trazes:
 plot_psd:
 	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_psd.jl
 
+plot_eigspectra:
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(ARGS)
+
 # Target to precompile packages in the environment
 cleanup_simulations:
 	@$(DELETE_SIMULS)
@@ -55,4 +58,4 @@ cleanup_simulations:
 cleanup_graphs:
 	@$(DELETE_GRAPHS)
 
-.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate plot_trazes plot_psd cleanup_simulations cleanup_graphs
+.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate plot_trazes plot_psd plot_eigspectra cleanup_simulations cleanup_graphs

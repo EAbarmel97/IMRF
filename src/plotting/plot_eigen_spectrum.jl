@@ -2,8 +2,8 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
     #compute linear fit 
     params = linear_fit_log_eigspectrum(eigvals)
     x = collect(Float64, 1:length(eigvals))
-
-    full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(at_temperature).pdf")
+    str_temp = replace(string(round(at_temperature, digits=6)), "." => "_")
+    full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(str_temp).pdf")
     #persist graph if doesn't exist
     if !isfile(full_file_path)
         #plot styling
@@ -11,7 +11,7 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
         #linear fit
         plot!(u -> exp10(params[1] + params[2]*log10(u)), label = "linear fit", minimum(x), maximum(x), xscale=:log10, yscale=:log10, lc=:red)
         
-        title!("Eigen spectrum magnetization data matrix at T =  $(at_temperature)")
+        title!("Eigen spectrum magnetization data matrix at T =  $(at_temperature)"; titlefontsize=12)
         xlabel!(L"n")
         ylabel!("Eigen spectrum")
         

@@ -1,5 +1,3 @@
-include .env
-
 # Define the directory for the Julia environment
 JULIA_DEPOT_PATH := $(shell pwd)/.julenv
 

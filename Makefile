@@ -28,7 +28,10 @@ rm_from_env:
 
 # Target to resolve dependencies and instantiate the environment
 instantiate:
+	@julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.instantiate()'
+	cp Project.toml $(JULIA_DEPOT_PATH)/Project.toml
 	@julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
+
 
 # Target to precompile packages in the environment
 precompile:

@@ -32,9 +32,12 @@ rm_from_env:
 
 # Target to resolve dependencies and instantiate the ICN environment
 instantiate:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
+	@julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.instantiate()'
+	cp Project.toml $(JULIA_DEPOT_PATH)/Project.toml
+	@julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
 
-# Target to precompile packages in the ICN environment
+
+# Target to precompile packages in the environment
 precompile:
 	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.precompile()'
 

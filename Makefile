@@ -63,7 +63,7 @@ cleanup_simulations:
 cleanup_graphs:
 	@$(DELETE_GRAPHS)
 
-cleanup_workdir:
+cleanup:
 	@($(DELETE_GRAPHS) && $(DELETE_SIMULS))
 
-.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate plot_trazes plot_psd plot_eigspectra cleanup_simulations cleanup_graphs cleanup_workdir
+.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate plot_trazes plot_psd plot_eigspectra cleanup_simulations cleanup_graphs cleanup

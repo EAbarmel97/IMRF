@@ -139,8 +139,8 @@ function write_csv_ensamblated_magnetization_by_temprature(write_to::String; sta
                         )
 
        magnetization = sample_magnetization_by_run(All_TEMPERATURES_DIRS[i]; statistic = statistic)
-       push!(magnetizations ,magnetization)
-       push!(temperatures,temperature)
+       push!(magnetizations, magnetization)
+       push!(temperatures, temperature)
     end    
     
     ensamblated_magnetization_file_path = create_file(joinpath(write_to, "$(statistic)_ensamblated_magnetization.csv"))

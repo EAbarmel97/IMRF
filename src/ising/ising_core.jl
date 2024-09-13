@@ -45,7 +45,7 @@ function do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
     
     rfim_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
 
-    Threads.@threads for run in 1:NUM_RUNS
+    for run in 1:NUM_RUNS
         reset_stats(ising_model)
         set_magnetization(INIT_MAGN, ising_model) #populates the spin grid with a given initial magnetization 
         update_magnetization(ising_model) #updates global magnetization 

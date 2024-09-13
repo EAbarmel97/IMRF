@@ -20,9 +20,9 @@ Format a floating-point number as a string with specified decimal precision.
 """
 function __format_str_float(f::Float64,decimal_places::Int64)::String
     integer_part = floor(Int, f)
-    decimal_part = floor(Int, (f - integer_part) * 10^decimal_places)
+    decimal_part = floor(Int, (f - integer_part) * 10^(decimal_places))
 
-    return @sprintf("%02d_%d", integer_part, decimal_part)
+    return @sprintf("%02d_%02d", integer_part, decimal_part)
 end
 
 function Base.parse(str::String)::Float64
@@ -75,25 +75,29 @@ Calculate a statistical measure of magnetization from data files in a given dire
 # Returns
 - `Float64`: The computed statistic of the magnetization data across all runs.
 """
-function sample_magnetization_by_run(temperature_dir::String; statistic::Function = mean)::Float64
+function sample_magnetization_by_run(temperature_dir::String; statistic::Function=mean)::Float64
     if !isdir(temperature_dir)
         @error "dir $(temperature_dir) does not exits!"
     end
 
     magnetization_per_run = Float64[]
-    for run in eachindex(readdir(temperature_dir))
-        magnetization_data = load_data_matrix(Float64, 
-                                    joinpath(temperature_dir, 
-                                    "magnetization",
-                                    "global_magnetization_r$run.csv"); 
-                                    drop_header=false, 
-                                    centralize=false)
-
-        ts = vec(magnetization_data)
-
-        push!(magnetization_per_run, mean(ts))
-    end
     
+    for run in eachindex(readdir(temperature_dir))
+        magn_csv = joinpath(temperature_dir,
+            "magnetization",
+            "global_magnetization_r$run.csv")
+        if isfile(magn_csv)
+            magnetization_data = load_data_matrix(Float64,
+                magn_csv;
+                drop_header=false,
+                centralize=false)
+
+            ts = vec(magnetization_data)
+
+            push!(magnetization_per_run, mean(ts))
+        end
+    end
+
     return statistic(magnetization_per_run)
 end
 

@@ -20,9 +20,8 @@ Format a floating-point number as a string with specified decimal precision.
 """
 function __format_str_float(f::Float64,decimal_places::Int64)::String
     integer_part = floor(Int, f)
-    decimal_part = floor(Int, (f - integer_part) * 10^(decimal_places))
-
-    return @sprintf("%02d_%02d", integer_part, decimal_part)
+    decimal_part = (f - integer_part)
+    return replace(@sprintf("%02d_", integer_part) * string(round(decimal_part, digits=decimal_places)), "_0." => "_")
 end
 
 function Base.parse(str::String)::Float64

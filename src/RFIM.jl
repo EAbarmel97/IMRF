@@ -1,5 +1,5 @@
 module RFIM
-using Base.Threads
+using Base.Threads, Base.Iterators
 using LinearAlgebra
 using Statistics 
 using Printf

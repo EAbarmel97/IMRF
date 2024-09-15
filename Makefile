@@ -1,10 +1,11 @@
-include .env
+include /home/eabarmel/.env
+
+CLI_DIR := /storage5/eabarmel/RFIM/cli
+
 # Define the directory for the Julia environment
 JULIA_DEPOT_PATH := $(shell pwd)/.julenv
 
 DELETE_SIMULS := rm -rf simulations/* 
-
-ICN_UPDATE_PROJECT_TOML := cp $(JULIA_DEPOT_PATH)/Project.toml Project.toml
 
 ICN_UPDATE_PROJECT_TOML := cp $(ICN_JULIA_DEPOT_PATH)/Project.toml Project.toml
 
@@ -36,25 +37,24 @@ instantiate:
 	cp Project.toml $(JULIA_DEPOT_PATH)/Project.toml
 	@$(ICN_JULIA_BIN)  --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
 
-
 # Target to precompile packages in the environment
 precompile:
 	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.precompile()'
 
 # Target to simulate the RFIM
 simulate:
-	@$(ICN_JULIA_BIN) --project=$(JULIA_DEPOT_PATH) cli/simulate.jl $(ARGS)
+	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(runs) $(CLI_DIR)/simulate.jl $(ngrid) $(runs) $(gens)
 
 # Target to plot the trazes of the times series
 plot_trazes:
-	@$(ICN_JULIA_BIN) --project=$(JULIA_DEPOT_PATH) cli/plot_trazes.jl $(ARG)
+	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI_DIR)/plot_trazes.jl $(assembled_magn)
 
 # Target to plot the psd of the rfft
 plot_psd:
-	@$(ICN_JULIA_BIN) --project=$(JULIA_DEPOT_PATH) cli/plot_psd.jl
+	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI_DIR)/plot_psd.jl
 
 plot_eigspectra:
-	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(ARGS)
+	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI_DIR)/plot_eigspectra.jl $(realizations) $(patterns)
 
 # Target to precompile packages in the environment
 cleanup_simulations:

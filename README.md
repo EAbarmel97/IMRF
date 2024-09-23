@@ -6,13 +6,14 @@ Julia implementation of the 2D Random Field Ising Model.
 
  2. Instantiante the julia-project running `make instantiante`.
 
- 3. Given `NGRID`: size of the spin lattice, `NUM_RUNS`: number of runs and `NUM_GENS`: number of generations. Run `make simulate ARGS="NGRID NUM_RUNS NUM_GENS"`. 
+ 3. Given `NGRID`: size of the spin lattice, `NUM_RUNS`: number of runs and `NUM_GENS`: number of generations. Run `make simulate ngrid=NGRID runs=NUM_RUNS gens=NUM_GENS`. 
  
- 4. Run `make plot_trazes ARG="x"`. With x being true of false. If "true" the plot of the ensambled magnetization is saved under graphs/simulations
+ 4. Run `make plot_trazes assembled_magn=true`. If "true" the plot of the assembled magnetization is saved under graphs/simulations
 
  5. Run `make plot_psd` to save all the average PSD by run at each fixed temperature.
 
- 6. Given `r`: number of realization and an array of patterns (suppose those are `pattern1, pattern2, pattern3`). Run `make plot_eigspectra ARGS="r pattern1 pattern2 pattern3"`
+ 6. Given `r`: number of realization and an array of patterns (suppose those are `pattern1, pattern2, pattern3`). Run `make plot_eigspectra realizations=r patterns="pattern1 pattern2 pattern3"`
 
- 7. To clean the "workspace" run `make cleanup_simulations && make cleanup_graphs`.
-
+ 7. To clean the "workspace" run `make cleanup`. This will delete all the simulations info and graphs persisted under the dirs 
+ "simulations" and graphs". If instead you want to just delete all the persisted simulations, run:`make cleanup_simulations` else
+ if you want to delete the plots saved in the "graphs" dir run `make cleanup_graphs`.

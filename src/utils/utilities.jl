@@ -93,7 +93,7 @@ function sample_magnetization_by_run(temperature_dir::String; statistic::Functio
 
             ts = vec(magnetization_data)
 
-            push!(magnetization_per_run, mean(ts))
+            push!(magnetization_per_run, mean(abs.(ts)))
         end
     end
 

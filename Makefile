@@ -39,18 +39,18 @@ precompile:
 
 # Target to simulate the RFIM
 simulate:
-	@julia --project=$(JULIA_DEPOT_PATH) cli/simulate.jl $(ARGS)
+	@julia --project=$(JULIA_DEPOT_PATH) cli/simulate.jl $(ngrid) $(runs) $(gens)
 
 # Target to plot the trazes of the times series
 plot_trazes:
-	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_trazes.jl $(ARG)
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_trazes.jl $(assembled_magn)
 
 # Target to plot the trazes of the times series
 plot_psd:
 	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_psd.jl
 
 plot_eigspectra:
-	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(ARGS)
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(realizations) $(patterns)
 
 # Target to precompile packages in the environment
 cleanup_simulations:

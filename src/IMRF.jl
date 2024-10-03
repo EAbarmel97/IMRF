@@ -1,4 +1,4 @@
-module RFIM
+module IMRF
 using Base.Threads
 using LinearAlgebra
 using Statistics 

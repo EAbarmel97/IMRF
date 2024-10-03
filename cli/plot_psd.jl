@@ -1,9 +1,9 @@
-include("../src/RFIM.jl")
-using .RFIM: plot_psd
+include("../src/IMRF.jl")
+using .IMRF: plot_psd
 
 function plot()
-    println("plotting psd, wait ...\n")
-    RFIM.plot_psd()
+  println("plotting psd, wait ...\n")
+  IMRF.plot_psd()
 end
 
 plot()

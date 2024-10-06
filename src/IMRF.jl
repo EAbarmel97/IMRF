@@ -1,7 +1,7 @@
-module RFIM
-using Base.Threads, Base.Iterators
+module IMRF
+using Base.Threads
 using LinearAlgebra
-using Statistics 
+using Statistics
 using Printf
 
 using DataFrames, CSV, GLM

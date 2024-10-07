@@ -1,3 +1,13 @@
+"""
+
+
+
+
+
+
+
+
+"""
 function do_run(
   temperature::Float64,
   n_grid::Int64,
@@ -49,8 +59,13 @@ function do_run(
 end
 
 """
-    do_simulations(arr::Vector{Float64}, N_GRID::Int64, NUM_RUNS::Int64, NUM_GENERATIONS::Int64;
-                   include_Tc::Bool=false, display_lattice::Bool=false, generate_rffts::Bool=false)
+    do_simulations(temperatures::Vector{Float64}, 
+                   N_GRID::Int64, 
+                   NUM_RUNS::Int64, 
+                   NUM_GENERATIONS::Int64;
+                   include_Tc::Bool=false, 
+                   display_lattice::Bool=false, 
+                   generate_rffts::Bool=false)
 
 Performs multiple simulation runs on a grid with specified parameters, optionally including a critical temperature, visualizing the lattice, 
 and generating random Fourier transforms.

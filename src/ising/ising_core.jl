@@ -1,100 +1,48 @@
-"""
-    do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
-             display_lattice::Bool=false, flip_strategy::ISING_LATTICE_STRATEGY=random_strategy, 
-             trans_dynamics::ISING_LATTICE_DYNAMICS=metropolis_dynamics)
-
-Performs simulations of the Ising model with specified parameters, initializing the lattice with a given magnetization, updating its state over generations, and optionally displaying the lattice state and saving data to files.
-
-# Arguments
-- `INIT_MAGN`: The initial magnetization value for the spin grid.
-- `TEMP`: The temperature at which the simulation is run.
-- `N_GRID::Int64`: The size of the grid for the simulation.
-- `NUM_RUNS::Int64`: The number of simulation runs to be performed.
-- `NUM_GENERATIONS::Int64`: The number of generations for each simulation run.
-
-# Keyword Arguments
-- `display_lattice::Bool=false`: If `true`, the spin grid's state is displayed at each generation.
-- `flip_strategy::ISING_LATTICE_STRATEGY=random_strategy`: Strategy for flipping spins (e.g., `random_strategy`).
-- `trans_dynamics::ISING_LATTICE_DYNAMICS=metropolis_dynamics`: Dynamics model for transitions (e.g., `metropolis_dynamics`).
-"""
-function do_model(INIT_MAGN, TEMP, N_GRID, NUM_RUNS, NUM_GENERATIONS;
+function do_run(
+  temperature::Float64,
+  n_grid::Int64,
+  run::Int64,
+  num_generations::Int64,
+  magnetization::Float64,
+  magnetization_dir::String,
+  grid_evolution_dir::Union{String,Nothing};
   display_lattice::Bool=false,
   flip_strategy::ISING_LATTICE_STRATEGY=random_strategy,
-  trans_dynamics::ISING_LATTICE_DYNAMICS=metropolis_dynamics)
+  trans_dynamics::ISING_LATTICE_DYNAMICS=metropolis_dynamics
+)
 
-  ising_model = IsingLattice(TEMP, N_GRID; flip_strategy=flip_strategy, trans_dynamics=trans_dynamics)
+  i_l = IsingLattice(temperature, n_grid; flip_strategy=flip_strategy, trans_dynamics=trans_dynamics)
+  reset_stats(i_l)
+  set_magnetization(magnetization, i_l) #populates the spin grid with a given initial magnetization              
+  update_magnetization(i_l) #updates global magnetization                                                    
+  update_energy(i_l) #updates global energy                                                                  
 
-  #= aux_dir = "../scripts/simulations_T_" * str_temp #folder containing simulations al temp str_temp  =#
-  if TEMP == CRITICAL_TEMP
-    str_temp = __format_str_float(CRITICAL_TEMP, 6)
-    aux_dir = create_dir(joinpath(SIMULATIONS_DIR, "simulations_T_",), sub_dir, str_temp)
-  else
-    str_temp = __format_str_float(TEMP, 6)
-    aux_dir = create_dir(joinpath(SIMULATIONS_DIR, "simulations_T_",), sub_dir, str_temp)
-  end
+  #= Creation of generic .csv files containing global magnetization time series =#
+  magnetization_file_path = create_file(magnetization_dir, "global_magnetization_r$(run).csv")
+  write_to_csv(magnetization_file_path, i_l.global_magnetization)
 
-  create_dir(joinpath(aux_dir, "fourier"), sub_dir)
-
-  #= Global magnetization time series realization will be saved on subdirectories over folder simultations=#
-  magnetization_aux_dir = create_dir(joinpath(aux_dir, "magnetization"), sub_dir)
-
-  #= Subdirectory containg a .csv file with the unicode representation of how the spin grid evolves with each generation at each run =#
+  #= Initial observations of the global magnetizaton are saved to their respective .txt files=#
   if display_lattice
-    grid_evolution_aux_dir = create_dir(joinpath(aux_dir, "grid_evolution"), sub_dir)
+    #= Creation of generic .txt files containing snapshots of the spin grid evolution at each generation =#
+    generic_spin_grid_file = create_file(grid_evolution_dir, "grid_evolution_r$(run).txt")
+
+    #= Initial spin grid state =#
+    open(generic_spin_grid_file, "w+") do io
+      stringified_grid_spin = display(i_l, i_l.cur_gen)
+      write(io, stringified_grid_spin)
+    end
   end
 
-  rfim_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
+  for generation in 1:num_generations
+    do_generation(i_l)
+    setfield!(i_l, :cur_gen, generation)
 
-  @sync for run in 1:NUM_RUNS
-    Threads.@spawn begin
-      i_l = IsingLattice(TEMP, N_GRID; flip_strategy=flip_strategy, trans_dynamics=trans_dynamics)
-      reset_stats(i_l)
-      set_magnetization(INIT_MAGN, i_l) #populates the spin grid with a given initial magnetization 
-      update_magnetization(i_l) #updates global magnetization 
-      update_energy(i_l) #updates global energy
+    write_to_csv(magnetization_file_path, i_l.global_magnetization)
 
-      #= Creation of generic .csv files containing global magnetization time series =#
-      magnetization_file_path = create_file(magnetization_aux_dir, "global_magnetization_r$(run).csv")
-      write_to_csv(magnetization_file_path, i_l.global_magnetization)
-
-      #= Initial observations of the global magnetizaton are saved to their respective .txt files=#
-      if display_lattice
-        #= Creation of generic .txt files containing snapshots of the spin grid evolution at each generation =#
-        generic_spin_grid_file = create_file(grid_evolution_aux_dir, "grid_evolution_r$(run).txt")
-
-        #= Initial spin grid state =#
-        open(generic_spin_grid_file, "w+") do io
-          stringified_grid_spin = display(i_l, i_l.cur_gen)
-          write(io, stringified_grid_spin)
-        end
-      end
-
-      for generation in 1:NUM_GENERATIONS
-        do_generation(i_l)
-        setfield!(i_l, :cur_gen, generation)
-
-        write_to_csv(magnetization_file_path, i_l.global_magnetization)
-
-        if display_lattice
-          open(generic_spin_grid_file, "a+") do io
-            stringified_grid_spin = display(i_l, i_l.cur_gen)
-            write(io, stringified_grid_spin)
-          end
-        end
-
-        if generation == NUM_GENERATIONS
-          do_generation(i_l)
-          setfield!(i_l, :cur_gen, NUM_GENERATIONS)
-
-          write_to_csv(magnetization_file_path, i_l.global_magnetization)
-
-          if display_lattice
-            open(generic_spin_grid_file, "a+") do io
-              stringified_grid_spin = display(i_l, i_l.cur_gen)
-              write(io, stringified_grid_spin)
-            end
-          end
-        end
+    if display_lattice
+      open(generic_spin_grid_file, "a+") do io
+        stringified_grid_spin = display(i_l, i_l.cur_gen)
+        write(io, stringified_grid_spin)
       end
     end
   end
@@ -108,7 +56,7 @@ Performs multiple simulation runs on a grid with specified parameters, optionall
 and generating random Fourier transforms.
 
 # Arguments
-- `arr::Vector{Float64}`: A vector of temperature values to be used in the simulations.
+- `temperatures::Vector{Float64}`: A vector of temperature values to be used in the simulations.
 - `N_GRID::Int64`: The size of the grid for the simulation.
 - `NUM_RUNS::Int64`: The number of simulation runs to be performed.
 - `NUM_GENERATIONS::Int64`: The number of generations for each simulation run.
@@ -118,30 +66,52 @@ and generating random Fourier transforms.
 - `display_lattice::Bool=false`: If `true`, the lattice will be displayed during the simulations.
 - `generate_rffts::Bool=false`: If `true`, random Fourier transforms will be generated and saved after the simulation runs.
 """
-function do_simulations(arr::Vector{Float64},
+function do_simulations(
+  temperatures::Vector{Float64},
   N_GRID::Int64,
   NUM_RUNS::Int64,
   NUM_GENERATIONS::Int64;
   include_Tc::Bool=false,
   display_lattice::Bool=false,
   generate_rffts::Bool=false,
-  write_csv_ensamblated_magnetization::Bool=false
+  write_csv_assembled_magnetization::Bool=false
 )
+  rfim_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
+
   if include_Tc
-    push!(arr, CRITICAL_TEMP)
-    sort!(arr)
+    push!(temperatures, CRITICAL_TEMP)
+    sort!(temperatures)
   end
 
-  for i in eachindex(arr)
-    #= random initial magnetization on the interval [-1 ,1] =#
-    rand_magn = rand() * 2 - 1
+  temps_runs_cartesian_prod = Iterators.product(temperatures, 1:NUM_RUNS)
 
-    temp = arr[i]
+  @sync for (i, temperature_run_pair) in enumerate(temps_runs_cartesian_prod)
+    @spawn begin
+      temp, run = temperature_run_pair
+      if temp == CRITICAL_TEMP
+        str_temp = __format_str_float(CRITICAL_TEMP, 6)
+        aux_dir = create_dir(joinpath(SIMULATIONS_DIR, "simulations_T_"), sub_dir, str_temp)
+      else
+        str_temp = __format_str_float(temp, 6)
+        aux_dir = create_dir(joinpath(SIMULATIONS_DIR, "simulations_T_"), sub_dir, str_temp)
+      end
 
-    do_model(rand_magn, temp, N_GRID, NUM_RUNS, NUM_GENERATIONS; display_lattice=display_lattice)
+      fourier_dir = create_dir(joinpath(aux_dir, "fourier"), sub_dir)
+
+      #= Global magnetization time series realization will be saved on subdirectories over folder simultations=#
+      magnetization_dir = create_dir(joinpath(aux_dir, "magnetization"), sub_dir)
+      grid_evolution_dir = nothing
+      #= Subdirectory containg a .csv file with the unicode representation of how the spin grid evolves with each generation at each run =#
+      if display_lattice
+        grid_evolution_dir = create_dir(joinpath(aux_dir, "grid_evolution"), sub_dir)                                                                  #random initial magnetization on the interval [-1 ,1]#                                      
+      end
+
+      rand_magn = rand() * 2 - 1
+      do_run(temp, N_GRID, run, NUM_GENERATIONS, rand_magn, magnetization_dir, grid_evolution_dir)
+    end
   end
 
-  if write_csv_ensamblated_magnetization
+  if write_csv_assembled_magnetization
     write_csv_ensamblated_magnetization_by_temprature(SIMULATIONS_DIR; statistic=mean)
   end
 

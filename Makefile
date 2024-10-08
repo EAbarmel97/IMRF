@@ -42,8 +42,8 @@ simulate:
 	@julia --project=$(JULIA_DEPOT_PATH) --threads $(nthreads) cli/simulate.jl $(ngrid) $(runs) $(gens) $(nthreads)
 
 # Target to plot the trazes of the times series
-plot_trazes:
-	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_trazes.jl $(assembled_magn)
+plot_traces:
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_traces.jl $(assembled_magn)
 
 # Target to plot the trazes of the times series
 plot_psd:

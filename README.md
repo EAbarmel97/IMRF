@@ -6,7 +6,7 @@ parallel Julia implementation of the 2D Ising Model.
 
  2. Instantiante the julia-project running `make instantiante`.
 
- 3. Given `NGRID`: size of the spin lattice, `NUM_RUNS`: number of runs and `NUM_GENS`: number of generations. Run `make simulate ngrid=NGRID runs=NUM_RUNS gens=NUM_GENS`. 
+ 3. Given `NGRID`: size of the spin lattice, `NUM_RUNS`: number of runs and `NUM_GENS`: number of generations. Run `make simulate ngrid=NGRID runs=NUM_RUNS gens=NUM_GENS`.   
  
  4. Run `make plot_trazes assembled_magn=true`. If "true" the plot of the assembled magnetization is saved under graphs/simulations
 

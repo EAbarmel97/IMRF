@@ -5,6 +5,10 @@ DELETE_SIMULS := rm -rf simulations/*
 
 DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/* && rm -rf graphs/eigspectra/*
 
+DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/*
+
+DELETE_GRAPHS_PARTITIONED := rm -rf graphs_partitioned/eigspectra/*
+
 # Update Project.toml
 UPDATE_PROJECT_TOML := cp $(JULIA_DEPOT_PATH)/Project.toml Project.toml
 
@@ -41,6 +45,10 @@ precompile:
 simulate:
 	@julia --project=$(JULIA_DEPOT_PATH) --threads $(nthreads) cli/simulate.jl $(ngrid) $(runs) $(gens) $(nthreads)
 
+# Target to simulate the RFIM
+simulate_partitioned:
+	@julia --project=$(JULIA_DEPOT_PATH) --threads $(nthreads) cli/simulate_partitioned.jl $(ngrid) $(sublattice_ngrid) $(runs) $(gens) $(nthreads)
+
 # Target to plot the trazes of the times series
 plot_traces:
 	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_traces.jl $(assembled_magn)
@@ -52,6 +60,8 @@ plot_psd:
 plot_eigspectra:
 	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(realizations) $(patterns)
 
+plot_eigspectra_partitioned:
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra_partitioned.jl $(patterns)
 # Target to precompile packages in the environment
 cleanup_simulations:
 	@$(DELETE_SIMULS)
@@ -60,6 +70,6 @@ cleanup_graphs:
 	@$(DELETE_GRAPHS)
 
 cleanup:
-	@($(DELETE_GRAPHS) && $(DELETE_SIMULS))
+	@($(DELETE_GRAPHS) && $(DELETE_SIMULS) && $(DELETE_GRAPHS_PARTITIONED) && $(DELETE_SIMULS_PARTITIONED))
 
-.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate plot_traces plot_psd plot_eigspectra cleanup_simulations cleanup_graphs cleanup
+.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate simulate_partitioned plot_traces plot_psd plot_eigspectra plot_eigspectra_partitioned cleanup_simulations cleanup_graphs cleanup

@@ -36,3 +36,21 @@ function plot_eigen_spectra(r::Int64, temperature_dirs::Vararg{String})
     end
   end
 end
+
+function plot_partitioned_eigen_spectra(temperature_dirs::Vararg{String};r::Int64=1)
+  num_runs = num_runs_rfim_details()
+  if r > num_runs
+    @error "impossible to plot eigspectra. 
+    Magnetization data matrix at fixed temp can not have more than $(num_runs) rows"
+  end
+
+  for temperature_dir in collect(temperature_dirs)
+    CSVS_INSIDE_TEMPERATURE_DIR = readdir(joinpath(abspath(temperature_dir), "magnetization"),join=true)
+    for i in eachindex(CSVS_INSIDE_TEMPERATURE_DIR)
+      magnetization_data_matrix = load_data_matrix(Float64,CSVS_INSIDE_TEMPERATURE_DIR[i]; drop_header=true)
+      eigspectum = compute_filtered_eigvals!(magnetization_data_matrix)
+      at_temperature = parse(temperature_dir)
+      plot_eigen_spectrum(eigspectum, at_temperature, 1, GRAPHS_PARTITIONED_EIGSPECTRA_DIR )
+    end  
+  end
+end

@@ -30,10 +30,10 @@ include("matrix_ops/svd.jl")
 
 export filter_dir_names_in_dir #io_operations.jl exports
 
-export do_simulations #ising_core.jl exports
+export do_simulations, do_partitioned_simulations #ising_core.jl exports
 
 export plot_traze, plot_trazes, plot_psd, plot_ensamblated_magnetization
-export plot_eigen_spectra  #plot_trazes.jl exports
+export plot_eigen_spectra, plot_partitioned_eigen_spectra #plot_trazes.jl exports
 
 export DEFAULT_TEMPERATURE_ARRAY  #utilities.jl exports
 export SIMULATIONS_DIR #paths.jl exports 

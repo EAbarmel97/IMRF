@@ -1,17 +1,18 @@
 function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, num_realizations::Int64, dir_to_save::String=".")
   #compute linear fit 
-  params = linear_fit_log_eigspectrum(eigvals)
+  fit_data = linear_fit_log_eigspectrum_r2(eigvals) #intercept, exponent,  r2
   x = collect(Float64, 1:length(eigvals))
   str_temp = replace(string(round(at_temperature, digits=6)), "." => "_")
   full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(str_temp).pdf")
   #persist graph if doesn't exist
   if !isfile(full_file_path)
     #plot styling
+    annot = string("R^2: ", round(fit_data[3],digits=3))
     plt = plot(x, eigvals, label=L"{\lambda}_n", xscale=:log10, yscale=:log10, alpha=0.2)
     #linear fit
-    plot!(u -> exp10(params[1] + params[2] * log10(u)), label="linear fit", minimum(x), maximum(x), xscale=:log10, yscale=:log10, lc=:red)
-
-    title!("Eigen spectrum magnetization data matrix at T = $(at_temperature) \n beta_fit = $(round(params[2],digits=4))"; titlefontsize=11)
+    plot!(u -> exp10(fit_data[1] + fit_data[2] * log10(u)), label="linear fit", minimum(x), maximum(x), xscale=:log10, yscale=:log10, lc=:red)
+    annotate!(10^(minimum(x)),10^(maximum(x)), annot, titlefontsize=10)
+    title!("Eigen spectrum magnetization data matrix at T = $(at_temperature) \n beta_fit = $(round(fit_data[2],digits=4))"; titlefontsize=11)
     xlabel!(L"n")
     ylabel!("Eigen spectrum")
 
@@ -30,9 +31,9 @@ function plot_eigen_spectra(r::Int64, temperature_dirs::Vararg{String})
   if r < num_runs
     for temperature_dir in collect(temperature_dirs)
       magnetization_data_matrix = ts_data_matrix(temperature_dir, r)
-      eigspectum = compute_filtered_eigvals!(magnetization_data_matrix)
+      eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix)
       at_temperature = parse(temperature_dir)
-      plot_eigen_spectrum(eigspectum, at_temperature, r, GRAPHS_DIR_EIGSPECTRA)
+      plot_eigen_spectrum(eigspectrum, at_temperature, r, GRAPHS_DIR_EIGSPECTRA)
     end
   end
 end

@@ -69,7 +69,17 @@ cleanup_simulations:
 cleanup_graphs:
 	@$(DELETE_GRAPHS)
 
-cleanup:
-	@($(DELETE_GRAPHS) && $(DELETE_SIMULS) && $(DELETE_GRAPHS_PARTITIONED) && $(DELETE_SIMULS_PARTITIONED))
+cleanup_simulations_partitioned:
+	@$(DELETE_SIMULS_PARTITIONED)
 
-.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate simulate_partitioned plot_traces plot_psd plot_eigspectra plot_eigspectra_partitioned cleanup_simulations cleanup_graphs cleanup
+cleanup_graphs_partitioned:
+	@$(DELETE_GRAPHS_PARTITIONED)
+
+cleanup:
+	@($(DELETE_GRAPHS) && $(DELETE_SIMULS))
+
+cleanup_patitioned:
+	@($(DELETE_GRAPHS_PARTITIONED) && $(DELETE_SIMULS_PARTITIONED))
+
+.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate simulate_partitioned plot_traces plot_psd plot_eigspectra plot_eigspectra_partitioned 
+.PHONY: cleanup_simulations cleanup_graphs cleanup_simulations_partitioned cleanup_graphs_partitioned cleanup cleanup_patitioned

@@ -28,3 +28,11 @@ function linear_fit_log_eigspectrum(eigspectrum::Vector{Float64})::Vector{Float6
 
     return [beta0, beta1]
 end
+
+function linear_fit_log_eigspectrum_r2(eigspectrum::Vector{Float64})::Vector{Float64}
+    log10_rank = log10.(collect(Float64, 1:length(eigspectrum)))
+    log10_eigspectrum = log10.(eigspectrum)
+    beta0, beta1,r2  = intercept_exponent_r2(log10_rank, log10_eigspectrum)
+    
+    return [beta0, beta1, r2]
+end

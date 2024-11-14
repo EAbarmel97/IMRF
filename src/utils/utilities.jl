@@ -104,3 +104,12 @@ function intercept_and_exponent(x::Vector{Float64}, y::Vector{Float64})::Vector{
     data = DataFrame(X=x,Y=y)
     return GLM.coef(GLM.lm(@formula(Y ~ X), data))
 end
+
+function intercept_exponent_r2(x::Vector{Float64}, y::Vector{Float64})::Vector{Float64}
+    data = DataFrame(X=x,Y=y)
+    ols = GLM.lm(@formula(Y ~ X), data)
+    param1, param2 = GLM.coef(ols)
+    return Float64[param1, param2, r2(ols)]
+end
+
+

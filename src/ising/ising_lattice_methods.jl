@@ -143,6 +143,55 @@ function update_magnetization(ising_lattice::IsingLattice)
     return
 end
 
+"""
+   row_range(n_grid::Int64, sublattice_ngrid::Int64, sub_lattice_id::Int64)::Vector{Int64}
+
+Given a lattice of size `n_grid` generates the i-coordinate range of a sublattice with size `sublattice_ngrid` with an id `sub_lattice_id`.
+"""
+function row_range(n_grid::Int64, sublattice_ngrid::Int64, sub_lattice_id::Int64)::UnitRange{Int64}
+    if !iszero(n_grid % sublattice_ngrid)
+       throw(DivideError())
+    end
+
+    lattice_size_ratio = convert(Int64,n_grid/sublattice_ngrid)
+    
+    i, _ = get_sublattice_coords(sub_lattice_id, convert(Int64,n_grid/sublattice_ngrid))
+    return 1+sublattice_ngrid*(i-1):i*sublattice_ngrid
+end
+
+"""
+   col_range(n_grid::Int64, sublattice_ngrid::Int64, sub_lattice_id::Int64)::Vector{Int64}
+
+Given a lattice of size `n_grid` generates the j-coordinate range of a sublattice with size `sublattice_ngrid` with an id `sub_lattice_id`.
+"""
+function col_range(n_grid::Int64, sublattice_ngrid::Int64, sub_lattice_id::Int64)::UnitRange{Int64}
+    if !iszero(n_grid % sublattice_ngrid)
+       throw(DivideError())
+    end
+
+    lattice_size_ratio = convert(Int64,n_grid/sublattice_ngrid)
+
+    _, j = get_sublattice_coords(sub_lattice_id, convert(Int64,n_grid/sublattice_ngrid))
+    return 1+sublattice_ngrid*(j-1):j*sublattice_ngrid
+end    
+
+"""
+   compute_local_magnetization(ising_lattice::IsingLattice, sub_lattice_id::Int64)::Float64
+
+Returns the magnetization restricted to a sublattice of size `sublattice_ngrid` with columwise enumeration `sub_lattice_id`
+"""
+function compute_local_magnetization(ising_lattice::IsingLattice, sublattice_ngrid::Int64, sub_lattice_id::Int64)::Float64
+    g_magnetization = 0.0
+    sublattice_ncells = sublattice_ngrid * sublattice_ngrid
+    for i in row_range(ising_lattice.ngrid, sublattice_ngrid, sub_lattice_id)
+        for j in col_range(ising_lattice.ngrid, sublattice_ngrid, sub_lattice_id)
+            g_magnetization += ising_lattice.grid[i,j]
+        end
+    end
+ 
+   return g_magnetization /= sublattice_ncells
+end
+
 #=Generates random changes in the spin grid but conserving a given magnetization=#
 function set_magnetization(magn::Float64, ising_lattice::IsingLattice)
     spin_grid = ising_lattice.grid
@@ -236,19 +285,25 @@ function get_cell_coords(id::Int, ising_lattice::IsingLattice)::Vector{Int64}
     return [i,j] 
 end
 
+function get_sublattice_coords(id::Int64, n::Int64)::Vector{Int64}
+    i = mod1(id, n)
+    j = cld(id, n)
+    return [i,j] 
+end
+
 #=Provided the (x,y) coordinates of a cell gives the id representation of a spin at location (x,y)=#
 function get_cell_id(i::Int, j::Int, ising_lattice::IsingLattice)::Int64
     return i + (j-1)*ising_lattice.ngrid   
 end
 
-#=Applies a flip cell spins to each spin in teh spin grid=#
+#=Applies a flip cell spins to each spin in the spin grid=#
 function do_generation(ising_lattice::IsingLattice)
     # with strategy it may happen that not all cells get flipped 
     if ising_lattice.flip_strategy === random_strategy
         for _ in 1:ising_lattice.ncells #this loops from 1 to N² (the number of cells )
             i = mod1(rand(Int),ising_lattice.ngrid)
             j = mod1(rand(Int),ising_lattice.ngrid)
-            try_cell_flip(i,j,ising_lattice) 
+            try_cell_flip(i,j,ising_lattice)
         end
     #all cells are granted to be flipped at least once (Fisher-Yates algorithm)
     #= TO DO: debug method =#

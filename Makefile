@@ -14,6 +14,10 @@ DELETE_SIMULS := rm -rf simulations/*
 
 DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/*
 
+DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/*
+
+DELETE_GRAPHS_PARTITIONED := rm -rf graphs_partitioned/eigspectra/*
+
 # Target to run Julia commands in the ICN environment
 julia_env:
 	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(ARGS)
@@ -52,6 +56,8 @@ plot_psd:
 plot_eigspectra:
 	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra.jl $(realizations) $(patterns)
 
+plot_eigspectra_partitioned:
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra_partitioned.jl $(patterns)
 # Target to precompile packages in the environment
 cleanup_simulations:
 	@$(DELETE_SIMULS)
@@ -59,7 +65,17 @@ cleanup_simulations:
 cleanup_graphs:
 	@$(DELETE_GRAPHS)
 
+cleanup_simulations_partitioned:
+	@$(DELETE_SIMULS_PARTITIONED)
+
+cleanup_graphs_partitioned:
+	@$(DELETE_GRAPHS_PARTITIONED)
+
 cleanup:
 	@($(DELETE_GRAPHS) && $(DELETE_SIMULS))
 
-.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate plot_traces plot_psd plot_eigspectra cleanup_simulations cleanup_graphs cleanup
+cleanup_patitioned:
+	@($(DELETE_GRAPHS_PARTITIONED) && $(DELETE_SIMULS_PARTITIONED))
+
+.PHONY: julia_env add_to_env rm_from_env instantiate precompile simulate simulate_partitioned plot_traces plot_psd plot_eigspectra plot_eigspectra_partitioned 
+.PHONY: cleanup_simulations cleanup_graphs cleanup_simulations_partitioned cleanup_graphs_partitioned cleanup cleanup_patitioned

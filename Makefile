@@ -42,7 +42,10 @@ precompile:
 
 # Target to simulate the Ising model
 simulate:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(nthreads) $(CLI)/simulate.jl $(ngrid) $(runs) $(gens) $(nthreads)
+	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(nthreads) $(CLI)/simulate.jl $(ngrid) $(sublattice_ngrid) $(runs) $(gens) $(nthreads)
+
+simulate_partitioned:
+	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(nthreads) $(CLI)/simulate_partitioned.jl $(ngrid) $(runs) $(gens) $(nthreads)
 
 # Target to plot the time series magnetization traces 
 plot_traces:                                                               
@@ -57,7 +60,7 @@ plot_eigspectra:
 	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra.jl $(realizations) $(patterns)
 
 plot_eigspectra_partitioned:
-	@$(ICN_JULIA_BIN)  --project=$(JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra_partitioned.jl $(patterns)
+	@$(ICN_JULIA_BIN)  --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra_partitioned.jl $(patterns)
 # Target to precompile packages in the environment
 cleanup_simulations:
 	@$(DELETE_SIMULS)

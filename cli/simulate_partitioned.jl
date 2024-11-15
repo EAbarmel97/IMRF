@@ -8,7 +8,8 @@ function main(ARGS)
   #ARG3[3]: NUM_RUNS
   #ARG3[4]: NUM_GENERATIONS
   args = parse.(Int64, ARGS[1:4])
-  IMRF.do_partitioned_simulations(IMRF.DEFAULT_TEMPERATURE_ARRAY,args...)
+  temperatures = Float64[0.5, 1.8, 2.26, 2.26918531421302, 2.31, 3.29]
+  IMRF.do_partitioned_simulations(temperatures, args...)
 end
 
 main(ARGS)

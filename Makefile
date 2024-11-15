@@ -42,10 +42,10 @@ precompile:
 
 # Target to simulate the Ising model
 simulate:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(nthreads) $(CLI)/simulate.jl $(ngrid) $(sublattice_ngrid) $(runs) $(gens) $(nthreads)
+	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(nthreads) $(CLI)/simulate.jl $(ngrid) $(runs) $(gens) $(nthreads)
 
 simulate_partitioned:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(nthreads) $(CLI)/simulate_partitioned.jl $(ngrid) $(runs) $(gens) $(nthreads)
+	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(nthreads) $(CLI)/simulate_partitioned.jl $(ngrid) $(sublattice_ngrid) $(runs) $(gens) $(nthreads)
 
 # Target to plot the time series magnetization traces 
 plot_traces:                                                               

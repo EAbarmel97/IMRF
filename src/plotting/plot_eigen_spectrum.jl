@@ -11,7 +11,10 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
     plt = plot(x, eigvals, label=L"{\lambda}_n", xscale=:log10, yscale=:log10, alpha=0.2)
     #linear fit
     plot!(u -> exp10(fit_data[1] + fit_data[2] * log10(u)), label="linear fit", minimum(x), maximum(x), xscale=:log10, yscale=:log10, lc=:red)
-
+    x_annot = maximum(x) * 0.9  # slightly left of the maximum x-value
+    y_annot = 1.1 * exp10(fit_data[1] + fit_data[2] * log10(x_annot))  # 10% above fit line at x_annot
+    #annotate!(x_annot, y_annot, annot, titlefontsize=10)
+    
     title!("Eigen spectrum magnetization data matrix at T = $(at_temperature) \n beta_fit = $(round(fit_data[2],digits=4))"; titlefontsize=11)
     xlabel!(L"n")
     ylabel!("Eigen spectrum")

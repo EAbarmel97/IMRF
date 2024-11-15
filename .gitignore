@@ -7,11 +7,17 @@
 simulations/simulations_T_*
 simulations/rfim_details.txt
 simulations/*.csv
+simulations_paritiioned/*.csv
+
+simulations_partitioned/simulations_T_*
+simulations_partitioned/*.csv
 
 #graphs/ 
 graphs/psd/simulations/simulations_T_*
 graphs/simulations/simulations_T_*
 graphs/eigspectra/*
+
+graphs_partititioned/eigspectra/*
 
 #vscode settings
 .vscode

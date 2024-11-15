@@ -57,7 +57,7 @@ plot_eigspectra:
 	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra.jl $(realizations) $(patterns)
 
 plot_eigspectra_partitioned:
-	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra_partitioned.jl $(patterns)
+	@$(ICN_JULIA_BIN)  --project=$(JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra_partitioned.jl $(patterns)
 # Target to precompile packages in the environment
 cleanup_simulations:
 	@$(DELETE_SIMULS)

@@ -8,14 +8,15 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
   if !isfile(full_file_path)
     #plot styling
     annot = string("R^2: ", round(fit_data[3],digits=3))
-    plt = plot(x, eigvals, label=L"{\lambda}_n", xscale=:log10, yscale=:log10, alpha=0.2)
+    plt = plot(x, eigvals, label=L"{\lambda}_n", xscale=:log10, yscale=:log10, lw=3, ls=:dot, alpha=0.2)
     #linear fit
-    plot!(u -> exp10(fit_data[1] + fit_data[2] * log10(u)), label="linear fit", minimum(x), maximum(x), xscale=:log10, yscale=:log10, lc=:red)
-    x_annot = maximum(x) * 0.9  # slightly left of the maximum x-value
-    y_annot = 1.1 * exp10(fit_data[1] + fit_data[2] * log10(x_annot))  # 10% above fit line at x_annot
-    #annotate!(x_annot, y_annot, annot, titlefontsize=10)
+    plot!(u -> exp10(fit_data[1] + fit_data[2] * log10(u)), label="linear fit", minimum(x), maximum(x), xscale=:log10, yscale=:log10)
     
-    title!("Eigen spectrum magnetization data matrix at T = $(at_temperature) \n beta_fit = $(round(fit_data[2],digits=4))"; titlefontsize=11)
+    title!(
+      string("Eigen spectrum magnetization data matrix at T = $(at_temperature)",
+              "\n beta_fit = $(round(fit_data[2],digits=4)), r**2 = $(round(fit_data[3],digits=4))"); 
+      titlefontsize=11
+      )
     xlabel!(L"n")
     ylabel!("Eigen spectrum")
 
@@ -24,7 +25,7 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
   end
 end
 
-function plot_eigen_spectra(r::Int64, temperature_dirs::Vararg{String})
+function plot_eigen_spectra(r::Int64, temperature_dirs::Vararg{String}; persist_eigspectra::Bool=false)
   num_runs = num_runs_rfim_details()
   if r > num_runs
     @error "impossible to plot eigspectra. 
@@ -36,25 +37,33 @@ function plot_eigen_spectra(r::Int64, temperature_dirs::Vararg{String})
       magnetization_data_matrix = ts_data_matrix(temperature_dir, r)
       eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix)
       at_temperature = parse(temperature_dir)
+      if persist_eigspectra
+        create_csvfile_and_write_eigspectrum(SIMULATIONS_EIGSPECTRA_DIR,at_temperature,eigspectrum)
+      end
       plot_eigen_spectrum(eigspectrum, at_temperature, r, GRAPHS_DIR_EIGSPECTRA)
     end
   end
 end
 
-function plot_partitioned_eigen_spectra(temperature_dirs::Vararg{String};r::Int64=1)
+function plot_partitioned_eigen_spectra(temperature_dirs::Vararg{String};r::Int64=1, persist_eigspectra::Bool=false)
+  #=
   num_runs = num_runs_rfim_details()
   if r > num_runs
     @error "impossible to plot eigspectra. 
     Magnetization data matrix at fixed temp can not have more than $(num_runs) rows"
-  end
+  end 
+  =#
 
   for temperature_dir in collect(temperature_dirs)
     CSVS_INSIDE_TEMPERATURE_DIR = readdir(joinpath(abspath(temperature_dir), "magnetization"),join=true)
     for i in eachindex(CSVS_INSIDE_TEMPERATURE_DIR)
       magnetization_data_matrix = load_data_matrix(Float64,CSVS_INSIDE_TEMPERATURE_DIR[i]; drop_header=true)
-      eigspectum = compute_filtered_eigvals!(magnetization_data_matrix)
+      eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix)
       at_temperature = parse(temperature_dir)
-      plot_eigen_spectrum(eigspectum, at_temperature, 1, GRAPHS_PARTITIONED_EIGSPECTRA_DIR )
+      if persist_eigspectra
+        create_csvfile_and_write_eigspectrum(SIMULATIONS_PARTITIONED_EIGSPECTRA_DIR, at_temperature, eigspectrum)
+      end
+      plot_eigen_spectrum(eigspectrum, at_temperature, r, GRAPHS_PARTITIONED_EIGSPECTRA_DIR)
     end  
   end
 end

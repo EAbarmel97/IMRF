@@ -23,6 +23,13 @@ function rfim_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
   end
 end
 
+function rfim_partitioned_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
+  io = create_file(joinpath(SIMULATIONS_PARTITIONED_DIR, "rfim_partitioned_details.txt"))
+  open(io, "w+") do io
+    write(io, "details: ngrid:$N_GRID, nruns:$NUM_RUNS, ngens:$NUM_GENERATIONS")
+  end
+end
+
 function simulations_dir(dir::String)
   All_SIMULATIONS_DIRS = String[]
   if isequal(abspath(dir), SIMULATIONS_DIR)
@@ -102,9 +109,9 @@ end
 function write_rffts(num_runs::Int64)
   #check if assembled_magnetization csv exists
   if filter((u) -> endswith(u, ".csv"), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
-    All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
+    All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[5:end]
   else
-    All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
+    All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
   end
 
   All_MAGNETIZATION_DIRS = joinpath.(All_SIMULATIONS_DIRS, "magnetization")
@@ -127,7 +134,7 @@ end
 
 function write_csv_assembled_magnetization_by_temprature(write_to::String; statistic::Function=mean)
   #this gets an array of dirs with the structure: ../simulations/simulations_T_xy_abcdefg_/
-  All_TEMPERATURES_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
+  All_TEMPERATURES_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
   All_MAGNETIZATION_DIRS = joinpath.(All_TEMPERATURES_DIRS, "magnetization")
   temperatures = Float64[]
   magnetizations = Float64[]
@@ -139,7 +146,7 @@ function write_csv_assembled_magnetization_by_temprature(write_to::String; stati
           All_MAGNETIZATION_DIRS[i]).match,
         "_" => ".")
     )
-
+    
     magnetization = sample_magnetization_by_run(All_TEMPERATURES_DIRS[i]; statistic=statistic)
     push!(magnetizations, magnetization)
     push!(temperatures, temperature)
@@ -147,6 +154,15 @@ function write_csv_assembled_magnetization_by_temprature(write_to::String; stati
 
   assembled_magnetization_file_path = create_file(joinpath(write_to, "$(statistic)_assembled_magnetization.csv"))
   CSV.write(assembled_magnetization_file_path, DataFrame(t=temperatures, M_n=magnetizations); append=true, delim=',')
+end
+
+function create_csvfile_and_write_eigspectrum(dir_to_save::String, at_temperature::Float64,eigspectrum::Vector{Float64})
+  if contains(dir_to_save,"simulations_partitioned")
+    file_name = create_file(joinpath(dir_to_save, string("eigspectrum_partitioned_ising_T_",__format_str_float(at_temperature,6),".csv")))
+  else
+    file_name = create_file(joinpath(dir_to_save, string("eigspectrum_T_",__format_str_float(at_temperature,6),".csv")))
+  end    
+  write_to_csv(file_name, eigspectrum)
 end
 
 function __count_lines_in_csv(file_path::String)

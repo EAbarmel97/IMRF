@@ -54,7 +54,5 @@ end
 function linear_fit_log_psd(f::Vector{Float64}, average_psd::Vector{Float64})::Vector{Float64}
     log10_f = log10.(f)
     log10_mean_psd = log10.(average_psd)
-    beta0, beta1 = intercept_and_exponent(log10_f,log10_mean_psd)
-
-    return [beta0, beta1]
+    return intercept_exponent_r2(log10_f,log10_mean_psd)
 end

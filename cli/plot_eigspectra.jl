@@ -15,7 +15,7 @@ function plot(ARGS)
     return
   end
 
-  IMRF.plot_eigen_spectra(arg1, temperature_dirs...)
+  IMRF.plot_eigen_spectra(arg1, temperature_dirs...; persist_eigspectra=true)
 end
 
 plot(ARGS)

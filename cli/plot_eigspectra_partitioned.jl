@@ -13,7 +13,7 @@ function plot(ARGS)
     return
   end
 
-  IMRF.plot_partitioned_eigen_spectra(temperature_dirs...)
+  IMRF.plot_partitioned_eigen_spectra(temperature_dirs...;persist_eigspectra=true)
 end
 
 plot(ARGS)

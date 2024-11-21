@@ -8,9 +8,9 @@ Generates and saves PSD plots for all simulation directories within the SIMULATI
 function plot_psd()
   #check if ensamblated_magnetization csv exists
   if filter((u) -> endswith(u, ".csv"), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
-    All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
+    All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[5:end]
   else
-    All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
+    All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
   end
 
   for i in eachindex(All_SIMULATIONS_DIRS)
@@ -44,7 +44,7 @@ function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
   f_without_DC = f[2:end]
   average_array_without_DC = mean_psd_array[2:end]
 
-  params = linear_fit_log_psd(f_without_DC, average_array_without_DC)
+  data = linear_fit_log_psd(f_without_DC, average_array_without_DC) #intercept, exponent & r2
 
   temperature = parse(temperature_dir)
   num_runs = RFFTS_CSVS_INSIDE_TEMPERATURE_DIR |> length
@@ -54,9 +54,11 @@ function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
   if !isfile(plot_file_path)
     plt = plot(f_without_DC, average_array_without_DC, label=L"S \left( f \right)", xscale=:log10, yscale=:log10, lc=:red)
     #linear fit
-    plot!((x) -> exp10(params[1] + params[2] * log10(x)), label=L"\hat{S} \left( f \right)", minimum(f_without_DC), maximum(f_without_DC), xscale=:log10, yscale=:log10, lc=:black)
+    plot!((x) -> exp10(data[1] + data[2] * log10(x)), label=L"\hat{S} \left( f \right)", minimum(f_without_DC), maximum(f_without_DC), xscale=:log10, yscale=:log10, lc=:black)
     #
-    title!("mean PSD by run, temp = $(round(temperature, digits=4)), beta_fit = $(round(params[2],digits=4))"; titlefontsize=12)
+    title!(string("Mean PSD by run, temp = $(round(temperature, digits=4))",
+          "\n beta_fit = $(round(data[2],digits=4)), r**2 = $(round(data[3],digits=4))"
+        ); titlefontsize=11)
     xlabel!(L"f")
     ylabel!("power density spectrum")
 

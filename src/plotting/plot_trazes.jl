@@ -36,9 +36,9 @@ Generate and save plots of magnetization time series for multiple simulation run
 """
 function plot_trazes(statistic::Function = mean)
     if filter(endswith(".csv"),readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
-        All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
+        All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[5:end]
     else
-        All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]
+        All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
     end
 
     All_MAGNETIZATION_DIRS = joinpath.(All_SIMULATIONS_DIRS, "magnetization")
@@ -74,7 +74,7 @@ function plot_ensamblated_magnetization(ensamblated_magnetization_file_path::Str
         xlims!(0,maximum(cols_magnetization_data[1]))
         vline!(plt, [CRITICAL_TEMP, CRITICAL_TEMP], label=L"T_c", linewidth=1, fillalpha=0.02)
         xlabel!(L"T")
-        ylabel!("spontaneus magnetization")
+        ylabel!("spontaneous magnetization")
         savefig(plt,joinpath(save_to, "ensamblated_magnetization.pdf"))
     end
 end

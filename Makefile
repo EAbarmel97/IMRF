@@ -1,11 +1,11 @@
 # Define the directory for the Julia environment
 JULIA_DEPOT_PATH := $(shell pwd)/.julenv
 
-DELETE_SIMULS := rm -rf simulations/*
+DELETE_SIMULS := rm -rf simulations/eigspectra/* && rm -rf simulations/simulations_T_* && rm simulations/rfim_*.txt && rm simulations/*.csv
 
 DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/* && rm -rf graphs/eigspectra/*
 
-DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/*
+DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/eigspectra/* && rm -rf simulations_partitioned/simulations_T* && rm simulations_partitioned/rfim_*.txt
 
 DELETE_GRAPHS_PARTITIONED := rm -rf graphs_partitioned/eigspectra/*
 

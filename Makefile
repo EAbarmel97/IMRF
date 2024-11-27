@@ -1,11 +1,11 @@
 # Define the directory for the Julia environment
 JULIA_DEPOT_PATH := $(shell pwd)/.julenv
 
-DELETE_SIMULS := rm -rf simulations/eigspectra/* && rm -rf simulations/simulations_T_* && rm simulations/rfim_*.txt && rm simulations/*.csv
+DELETE_SIMULS := rm -rf simulations/eigspectra/* && rm -rf simulations/simulations_T_* && rm simulations/imrf_*.txt && rm simulations/*.csv
 
 DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/* && rm -rf graphs/eigspectra/*
 
-DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/eigspectra/* && rm -rf simulations_partitioned/simulations_T* && rm simulations_partitioned/rfim_*.txt
+DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/eigspectra/* && rm -rf simulations_partitioned/simulations_T* && rm simulations_partitioned/imrf_*.txt
 
 DELETE_GRAPHS_PARTITIONED := rm -rf graphs_partitioned/eigspectra/*
 
@@ -58,10 +58,11 @@ plot_psd:
 	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_psd.jl 
 
 plot_eigspectra:
-	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(realizations) $(patterns)
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(realizations) $(transient_length) $(patterns) 
 
 plot_eigspectra_partitioned:
-	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra_partitioned.jl $(patterns)
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra_partitioned.jl $(transient_length) $(patterns)
+
 # Target to precompile packages in the environment
 cleanup_simulations:
 	@$(DELETE_SIMULS)

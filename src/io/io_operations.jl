@@ -16,17 +16,17 @@ function create_file(file_name::String, args...)::String
   return touch(file_path)
 end
 
-function rfim_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
-  io = create_file(joinpath(SIMULATIONS_DIR, "rfim_details.txt"))
+function imrf_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
+  io = create_file(joinpath(SIMULATIONS_DIR, "imrf_details.txt"))
   open(io, "w+") do io
     write(io, "details: ngrid:$N_GRID, nruns:$NUM_RUNS, ngens:$NUM_GENERATIONS")
   end
 end
 
-function rfim_partitioned_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
-  io = create_file(joinpath(SIMULATIONS_PARTITIONED_DIR, "rfim_partitioned_details.txt"))
+function imrf_partitioned_info(N_GRID, SUBLATTICE_NGRID, NUM_RUNS, NUM_GENERATIONS)
+  io = create_file(joinpath(SIMULATIONS_PARTITIONED_DIR, "imrf_partitioned_details.txt"))
   open(io, "w+") do io
-    write(io, "details: ngrid:$N_GRID, nruns:$NUM_RUNS, ngens:$NUM_GENERATIONS")
+    write(io, "details: ngrid:$N_GRID, sublattice_ngrid:$SUBLATTICE_NGRID ,nruns:$NUM_RUNS, ngens:$NUM_GENERATIONS")
   end
 end
 
@@ -174,11 +174,25 @@ function __count_lines_in_csv(file_path::String)
   return n
 end
 
-function num_runs_rfim_details()::Int64
-  if !isfile(joinpath(SIMULATIONS_DIR), "rfim_details.txt")
-    @error "$(SIMULATIONS_DIR)/rfim_details.txt does not exit. Impossible to parse Int64"
+function runs_and_gens_imrf_details()::Vector{Int64}
+  if !isfile(joinpath(SIMULATIONS_DIR), "imrf_details.txt")
+    @error "$(SIMULATIONS_DIR)/imrf_details.txt does not exit. Impossible to parse Int64"
   end
 
-  return parse(Int64,
-    replace(match(r"nruns:[0-9]+", read(joinpath(SIMULATIONS_DIR, "rfim_details.txt"), String)).match, "nruns:" => ""))
+  imrf_string = read(joinpath(SIMULATIONS_DIR, "imrf_details.txt"),String)
+     
+  runs = parse(Int64, replace(match(r"nruns:[0-9]+", imrf_string).match, "nruns:" => ""))
+  gens = parse(Int64, replace(match(r"ngens:[0-9]+", imrf_string).match, "ngens:" => ""))
+
+  return Int64[runs, gens]
+end
+
+function gens_imrf_partitioned_details()::Int64
+  if !isfile(joinpath(SIMULATIONS_PARTITIONED_DIR), "imrf_partitioned_details.txt")
+    @error "$(SIMULATIONS_PARTITIONED_DIR)/imrf_partitioned_details.txt does not exit. Impossible to parse Int64"
+  end
+
+  imrf_string = read(joinpath(SIMULATIONS_PARTITIONED_DIR, "imrf_partitioned_details.txt"),String)
+
+  return parse(Int64, replace(match(r"ngens:[0-9]+", imrf_string).match, "ngens:" => ""))
 end

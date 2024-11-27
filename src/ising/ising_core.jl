@@ -177,7 +177,7 @@ function do_simulations(
 	generate_rffts::Bool = false,
 	write_csv_assembled_magnetization::Bool = false
 )
-	rfim_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
+	imrf_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
 
 	if include_Tc
 		push!(temperatures, CRITICAL_TEMP)
@@ -252,7 +252,7 @@ function do_partitioned_simulations(
 	NUM_GENERATIONS::Int64;
 	include_Tc::Bool = false,
 ) 
-	rfim_partitioned_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
+	imrf_partitioned_info(N_GRID, SUBLATTICE_NGRID, NUM_RUNS, NUM_GENERATIONS)
 
 	if include_Tc
 		push!(temperatures, CRITICAL_TEMP)

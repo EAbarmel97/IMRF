@@ -25,17 +25,21 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
   end
 end
 
-function plot_eigen_spectra(r::Int64, temperature_dirs::Vararg{String}; persist_eigspectra::Bool=false)
-  num_runs = num_runs_rfim_details()
+function plot_eigen_spectra(r::Int64, transient_length::Int64, temperature_dirs::Vararg{String}; persist_eigspectra::Bool=false)
+  num_runs, num_gens = runs_and_gens_imrf_details()
   if r > num_runs
     @error "impossible to plot eigspectra. 
     Magnetization data matrix at fixed temp can not have more than $(num_runs) rows"
   end
 
+  if transient_length > num_gens
+   @error "impossible to discard $(transient_length) generations out of $(num_gens)"
+  end
+
   if r < num_runs
     for temperature_dir in collect(temperature_dirs)
       magnetization_data_matrix = ts_data_matrix(temperature_dir, r)
-      eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix)
+      eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix[transient_length+1:end,:])
       at_temperature = parse(temperature_dir)
       if persist_eigspectra
         create_csvfile_and_write_eigspectrum(SIMULATIONS_EIGSPECTRA_DIR,at_temperature,eigspectrum)
@@ -45,20 +49,17 @@ function plot_eigen_spectra(r::Int64, temperature_dirs::Vararg{String}; persist_
   end
 end
 
-function plot_partitioned_eigen_spectra(temperature_dirs::Vararg{String};r::Int64=1, persist_eigspectra::Bool=false)
-  #=
-  num_runs = num_runs_rfim_details()
-  if r > num_runs
-    @error "impossible to plot eigspectra. 
-    Magnetization data matrix at fixed temp can not have more than $(num_runs) rows"
+function plot_partitioned_eigen_spectra(transient_length::Int64, temperature_dirs::Vararg{String}; r::Int64=1, persist_eigspectra::Bool=false)
+  num_gens = gens_imrf_partitioned_details()
+  if transient_length > num_gens
+    @error "impossible to discard $(transient_length) generations out of $(num_gens)"
   end 
-  =#
-
+  
   for temperature_dir in collect(temperature_dirs)
     CSVS_INSIDE_TEMPERATURE_DIR = readdir(joinpath(abspath(temperature_dir), "magnetization"),join=true)
     for i in eachindex(CSVS_INSIDE_TEMPERATURE_DIR)
       magnetization_data_matrix = load_data_matrix(Float64,CSVS_INSIDE_TEMPERATURE_DIR[i]; drop_header=true)
-      eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix)
+      eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix[transient_length + 1:end,:])
       at_temperature = parse(temperature_dir)
       if persist_eigspectra
         create_csvfile_and_write_eigspectrum(SIMULATIONS_PARTITIONED_EIGSPECTRA_DIR, at_temperature, eigspectrum)

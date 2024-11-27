@@ -14,7 +14,7 @@ parallel Julia implementation of the 2D Ising Model.
 
  3. Run `make plot_psd` to save all the average PSD by run at each fixed temperature.
 
- 4. Given `r`: number of realization and an array of patterns (suppose those are `pattern1, pattern2, pattern3`). Run `make plot_eigspectra realizations=r patterns="pattern1 pattern2 pattern3"`
+ 4. Given `r`: number of realization, `TRANSIENT`: transient length and an array of patterns (suppose those are `pattern1, pattern2, pattern3`). Run `make plot_eigspectra realizations=r transient_length=TRANSIENT patterns="pattern1 pattern2 pattern3"`
 
  5. To clean the "workspace" run `make cleanup`. This will delete all the simulations info and graphs persisted under the dirs 
  "simulations" and graphs". If instead you want to just delete all the persisted simulations, run:`make cleanup_simulations` else
@@ -22,10 +22,10 @@ parallel Julia implementation of the 2D Ising Model.
 
  # Partitioned Ising Model
 
- 1. Given `NGRID`: size of the spin lattice, `SUBLATTICE_NGRID`:size of the sublattices, `NUM_RUNS`: number of runs (realizations), `NUM_GENS`: number of generations and `NTHREADS`: the number of threads. Run `make simulate_partitioned ngrid=NGRID sublattice_ngrid=SUBLATTICE_NGRID runs=NUM_RUNS gens=NUM_GENS nthreads=NTHREADS`.
+ 1. Given `NGRID`: size of the spin lattice,`TRANSIENT`: transient length, `SUBLATTICE_NGRID`:size of the sublattices, `NUM_RUNS`: number of runs (realizations), `NUM_GENS`: number of generations and `NTHREADS`: the number of threads. Run `make simulate_partitioned ngrid=NGRID sublattice_ngrid=SUBLATTICE_NGRID runs=NUM_RUNS gens=NUM_GENS nthreads=NTHREADS`.
 Make sure the value of `sublattice_grid` divides `ngrid` otherwise an error will be thrown. 
  
- 2. Given an array of patterns (suppose those are `pattern1, pattern2, pattern3`). Run `make plot_eigspectra_partitioned patterns="pattern1 pattern2 pattern3"`
+ 2. Given `TRANSIENT`: transient length and array of patterns (suppose those are `pattern1, pattern2, pattern3`). Run `make plot_eigspectra_partitioned transient_length=TRANSIENT patterns="pattern1 pattern2 pattern3"`
 
  3. To clean the "workspace" run `make cleanup_partitioned`. This will delete all the simulations info and graphs persisted under the dirs 
  "simulations" and graphs". If instead you want to just delete all the persisted simulations, run:`make cleanup_simulations_partitioned` else

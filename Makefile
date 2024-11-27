@@ -10,11 +10,11 @@ ICN_ADD_AND_UPDATE := $(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'usi
 # Custom shell command to remove a package from the environment and update Project.toml for ICN
 ICN_REMOVE_AND_UPDATE := $(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.rm("$(ARG)");' && $(ICN_UPDATE_PROJECT_TOML)
 
-DELETE_SIMULS := rm -rf simulations/eigspectra/* && rm -rf simulations/simulations_T_* && rm simulations/rfim_*.txt && rm simulations/*.csv
+DELETE_SIMULS := rm -rf simulations/eigspectra/* && rm -rf simulations/simulations_T_* && rm simulations/imrf_*.txt && rm simulations/*.csv
 
 DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/*
 
-DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/eigspectra/* && rm -rf simulations_partitioned/simulations_T* && rm simulations_partitioned/rfim_*.txt
+DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/eigspectra/* && rm -rf simulations_partitioned/simulations_T* && rm simulations_partitioned/imrf_*.txt
 
 DELETE_GRAPHS_PARTITIONED := rm -rf graphs_partitioned/eigspectra/*
 
@@ -57,10 +57,11 @@ plot_psd:
 
 # Target to plot eigspectra 
 plot_eigspectra:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra.jl $(realizations) $(patterns)
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(realizations) $(transient_length) $(patterns) 
 
 plot_eigspectra_partitioned:
-	@$(ICN_JULIA_BIN)  --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra_partitioned.jl $(patterns)
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra_partitioned.jl $(transient_length) $(patterns)
+
 # Target to precompile packages in the environment
 cleanup_simulations:
 	@$(DELETE_SIMULS)

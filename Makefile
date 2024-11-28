@@ -57,10 +57,10 @@ plot_psd:
 
 # Target to plot eigspectra 
 plot_eigspectra:
-	@julia --project=$(JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra.jl $(realizations) $(transient_length) $(patterns) 
+	@$(ICN_JULIA_BIN) --project=$(JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra.jl $(realizations) $(transient_length) $(patterns) 
 
 plot_eigspectra_partitioned:
-	@julia --project=$(JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra_partitioned.jl $(transient_length) $(patterns)
+	@$(ICN_JULIA_BIN) --project=$(JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra_partitioned.jl $(transient_length) $(patterns)
 
 # Target to precompile packages in the environment
 cleanup_simulations:

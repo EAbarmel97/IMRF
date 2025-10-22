@@ -3,6 +3,7 @@ using Base.Threads
 using LinearAlgebra
 using Statistics
 using Printf
+using Measures 
 
 using DataFrames, CSV, GLM
 using LaTeXStrings
@@ -19,7 +20,7 @@ include("ising/ising_lattice_methods.jl")
 include("ising/ising_core.jl")
 
 include("plotting/plot_psd.jl")
-include("plotting/plot_trazes.jl")
+include("plotting/plot_traces.jl")
 include("plotting/plot_eigen_spectrum.jl")
 
 include("utils/utilities.jl")
@@ -32,8 +33,8 @@ export filter_dir_names_in_dir #io_operations.jl exports
 
 export do_simulations, do_partitioned_simulations #ising_core.jl exports
 
-export plot_traze, plot_trazes, plot_psd, plot_ensamblated_magnetization
-export plot_eigen_spectra, plot_partitioned_eigen_spectra #plot_trazes.jl exports
+export plot_trace, plot_traces, plot_psd, plot_assembled_magnetization
+export plot_eigen_spectra, plot_partitioned_eigen_spectra #plot_traces.jl exports
 
 export DEFAULT_TEMPERATURE_ARRAY  #utilities.jl exports
 export SIMULATIONS_DIR #paths.jl exports 

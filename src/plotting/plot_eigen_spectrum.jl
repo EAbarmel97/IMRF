@@ -38,11 +38,11 @@ function plot_eigen_spectra(r::Int64, transient_length::Int64, temperature_dirs:
 
   if r < num_runs
     for temperature_dir in collect(temperature_dirs)
-      magnetization_data_matrix = ts_data_matrix(temperature_dir, r)
+      magnetization_data_matrix = ts_data_matrix(temperature_dir, r)'
       eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix[transient_length+1:end,:])
       at_temperature = parse(temperature_dir)
       if persist_eigspectra
-        create_csvfile_and_write_eigspectrum(SIMULATIONS_EIGSPECTRA_DIR,at_temperature,eigspectrum)
+        create_csvfile_and_write_eigspectrum(SIMULATIONS_EIGSPECTRA_DIR, at_temperature, eigspectrum)
       end
       plot_eigen_spectrum(eigspectrum, at_temperature, r, GRAPHS_DIR_EIGSPECTRA)
     end

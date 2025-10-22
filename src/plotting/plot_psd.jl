@@ -1,7 +1,5 @@
 """
-using Plots: titlefont
-using Plots: bottom
-    plot_psd()
+  plot_psd()
 
 Generates and saves PSD plots for all simulation directories within the SIMULATIONS_DIR directory.
 """
@@ -52,7 +50,7 @@ function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
   plot_file_path = joinpath(destination_dir, "psd_$(match(r"T_[0-9][0-9]_[0-9]+",temperature_dir).match)_r_1_$(num_runs).pdf")
 
   if !isfile(plot_file_path)
-    plt = plot(f_without_DC, average_array_without_DC, label=L"S \left( f \right)", xscale=:log10, yscale=:log10, lc=:red)
+    #= plt = plot(f_without_DC, average_array_without_DC, label=L"S \left( f \right)", xscale=:log10, yscale=:log10, lc=:red)
     #linear fit
     plot!((x) -> exp10(data[1] + data[2] * log10(x)), label=L"\hat{S} \left( f \right)", minimum(f_without_DC), maximum(f_without_DC), xscale=:log10, yscale=:log10, lc=:black)
     #
@@ -61,8 +59,49 @@ function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
         ); titlefontsize=11)
     xlabel!(L"f")
     ylabel!("power density spectrum")
+ =#
 
-    #file saving
+    plt = plot(
+      f_without_DC, average_array_without_DC,
+      label = latexstring("S(f)"),
+      xscale = :log10,
+      yscale = :log10,
+      xlabel = latexstring("f"),
+      ylabel = latexstring("S(f)"),
+      title = latexstring(
+          "Mean\\ PSD\\ by\\ run,\\ T = ",
+          string(round(temperature, digits=4)),
+          ",\\ \\beta = ",
+          string(round(data[2], digits=4)),
+          ",\\ R^{2} = ",
+          string(round(data[3], digits=4))
+      ),
+      titlefont  = font(22),
+      guidefont  = font(20),
+      tickfont   = font(18),
+      legendfont = font(18),
+      fontfamily = "Times",
+      linewidth  = 2,
+      lc = :red,
+      framestyle = :box,
+      grid = false,
+      size = (950, 600),
+      left_margin = 14mm,
+      right_margin = 10mm,
+      bottom_margin = 8mm,
+      top_margin = 8mm,
+      guide_position = :left,
+      extra_padding = true,
+    )
+      plot!(
+        (x) -> exp10(data[1] + data[2] * log10(x)),
+        label = latexstring("\\hat{S}(f)"),
+        xscale = :log10,
+        yscale = :log10,
+        lc = :black,
+      )
+
+    # file saving
     savefig(plt, plot_file_path)
   end
 end

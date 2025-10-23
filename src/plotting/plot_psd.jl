@@ -50,17 +50,6 @@ function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
   plot_file_path = joinpath(destination_dir, "psd_$(match(r"T_[0-9][0-9]_[0-9]+",temperature_dir).match)_r_1_$(num_runs).pdf")
 
   if !isfile(plot_file_path)
-    #= plt = plot(f_without_DC, average_array_without_DC, label=L"S \left( f \right)", xscale=:log10, yscale=:log10, lc=:red)
-    #linear fit
-    plot!((x) -> exp10(data[1] + data[2] * log10(x)), label=L"\hat{S} \left( f \right)", minimum(f_without_DC), maximum(f_without_DC), xscale=:log10, yscale=:log10, lc=:black)
-    #
-    title!(string("Mean PSD by run, temp = $(round(temperature, digits=4))",
-          "\n beta_fit = $(round(data[2],digits=4)), r**2 = $(round(data[3],digits=4))"
-        ); titlefontsize=11)
-    xlabel!(L"f")
-    ylabel!("power density spectrum")
- =#
-
     plt = plot(
       f_without_DC, average_array_without_DC,
       label = latexstring("S(f)"),

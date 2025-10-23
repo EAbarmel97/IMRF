@@ -5,7 +5,7 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
   str_temp = replace(string(round(at_temperature, digits=6)), "." => "_")
   full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(str_temp).pdf")
   #persist graph if doesn't exist
-  if !isfile(full_file_path)
+  #= if !isfile(full_file_path)
     #plot styling
     annot = string("R^2: ", round(fit_data[3],digits=3))
     plt = plot(x, eigvals, label=L"{\lambda}_n", xscale=:log10, yscale=:log10, lw=3, ls=:dot, alpha=0.2)
@@ -22,7 +22,67 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
 
     #file saving
     savefig(plt, full_file_path)
-  end
+  end =#
+
+  if !isfile(full_file_path)
+        plt = plot(
+            x, eigvals,
+            label = latexstring("\\lambda_n"),
+            xscale = :log10,
+            yscale = :log10,
+            lw = 3,
+            ls = :dot,
+            alpha = 0.3,
+            title = latexstring(
+                "Eigen\\ spectrum:\\ T = ",
+                string(round(at_temperature, digits = 4)),
+                ",\\ \\beta = ",
+                string(round(fit_data[2], digits = 4))
+            ),
+            xlabel = latexstring("n"),
+            ylabel = latexstring("\\lambda_n"),
+            titlefont  = font(16, "Times"),
+            guidefont  = font(20, "Times"),
+            tickfont   = font(18, "Times"),
+            legendfont = font(18),
+            fontfamily = "Times",
+            linewidth  = 2,
+            lc = :red,
+            framestyle = :box,
+            grid = false,
+            size = (950, 600),
+            left_margin = 14mm,
+            right_margin = 10mm,
+            bottom_margin = 8mm,
+            top_margin = 8mm,
+            guide_position = :left,
+            extra_padding = true,
+        )
+
+        plot!(
+            u -> exp10(fit_data[1] + fit_data[2] * log10(u)),
+            label = latexstring("\\text{linear fit}"),
+            xscale = :log10,
+            yscale = :log10,
+            lc = :black,
+        )
+
+        # --- R² annotation with subtle background box ---
+        r2_text = latexstring("R^{2} = ", string(round(fit_data[3], digits = 4)))
+        ann_x = minimum(x) * 1.15
+        ann_y = minimum(eigvals) * 1.5
+
+        annotate!(
+            ann_x, ann_y,
+            Plots.text(
+                r2_text,
+                "Times", 16, :left, :bottom, :black;
+                bbox = (stroke(0.5, :black), fill(RGBA(1,1,1,0.8)))
+            )
+        )
+
+        savefig(plt, full_file_path)
+    end
 end
 
 function plot_eigen_spectra(r::Int64, transient_length::Int64, temperature_dirs::Vararg{String}; persist_eigspectra::Bool=false)

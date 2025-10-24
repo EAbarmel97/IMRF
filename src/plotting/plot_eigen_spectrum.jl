@@ -4,25 +4,90 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
   x = collect(Float64, 1:length(eigvals))
   str_temp = replace(string(round(at_temperature, digits=6)), "." => "_")
   full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(str_temp).pdf")
+  
   #persist graph if doesn't exist
   if !isfile(full_file_path)
-    #plot styling
-    annot = string("R^2: ", round(fit_data[3],digits=3))
-    plt = plot(x, eigvals, label=L"{\lambda}_n", xscale=:log10, yscale=:log10, lw=3, ls=:dot, alpha=0.2)
-    #linear fit
-    plot!(u -> exp10(fit_data[1] + fit_data[2] * log10(u)), label="linear fit", minimum(x), maximum(x), xscale=:log10, yscale=:log10)
-    
-    title!(
-      string("Eigen spectrum magnetization data matrix at T = $(at_temperature)",
-              "\n beta_fit = $(round(fit_data[2],digits=4)), r**2 = $(round(fit_data[3],digits=4))"); 
-      titlefontsize=11
+      plt = plot(
+          x, eigvals,
+          lw = 2,
+          lc = :red,
+          ls = :dot,          
+          alpha = 0.6,
+          label = "",          
+          xscale = :log10,
+          yscale = :log10,
+          title = latexstring(
+              "Eigen\\ spectrum:\\ T = ",
+              string(round(at_temperature, digits = 4)),
+              ",\\ \\beta = ",
+              string(round(fit_data[2], digits = 4))
+          ),
+          xlabel = L"n",
+          ylabel = L"\lambda_n",
+          titlefont  = font(16, "CMU Serif"),
+          guidefont  = font(20, "CMU Serif"),
+          tickfont   = font(18, "CMU Serif"),
+          legendfont = font(18),
+          fontfamily = "CMU Serif",
+          framestyle = :box,
+          grid = false,
+          legend = :topright,
+          size = (950, 600),
+          left_margin = 14mm,
+          right_margin = 10mm,
+          bottom_margin = 8mm,
+          top_margin = 8mm,
+          guide_position = :left,
+          extra_padding = true,
       )
-    xlabel!(L"n")
-    ylabel!("Eigen spectrum")
 
-    #file saving
-    savefig(plt, full_file_path)
-  end
+      scatter!(
+          plt,
+          x, eigvals,
+          markershape = :circle,
+          markersize = 4,
+          markercolor = :red,
+          markerstrokewidth = 0.8,
+          markeralpha = 0.9,
+          label = L"\lambda_n",
+      )
+
+      # Linear fit
+      plot!(
+          plt,
+          u -> exp10(fit_data[1] + fit_data[2] * log10(u)),
+          label = L"linear fit",
+          xscale = :log10,
+          yscale = :log10,
+          lc = :black,
+          lw = 2
+      )
+
+
+      # Define position and proportional size based on axis range
+      xmin, xmax = extrema(x)
+      ymin, ymax = extrema(eigvals)
+      xrange = log10(xmax / xmin)
+      yrange = log10(ymax / ymin)
+
+      # define box dimensions relative to log-scale range
+      x_annot = xmin * 10^(0.02 * xrange)
+      y_annot = ymin * 10^(0.08 * yrange)
+
+      # Place R² text centered within the box
+      annotate!(
+          x_annot,
+          y_annot,
+          text(latexstring("R^{2} = ", round(fit_data[3], digits = 4)), 
+          "CMU Serif", 
+          16, 
+          :left, 
+          :bottom, 
+          :black)
+      )
+
+      savefig(plt, full_file_path)
+    end
 end
 
 function plot_eigen_spectra(r::Int64, transient_length::Int64, temperature_dirs::Vararg{String}; persist_eigspectra::Bool=false)
@@ -36,13 +101,13 @@ function plot_eigen_spectra(r::Int64, transient_length::Int64, temperature_dirs:
    @error "impossible to discard $(transient_length) generations out of $(num_gens)"
   end
 
-  if r < num_runs
+  if r <= num_runs
     for temperature_dir in collect(temperature_dirs)
-      magnetization_data_matrix = ts_data_matrix(temperature_dir, r)
+      magnetization_data_matrix = ts_data_matrix(temperature_dir, r)'
       eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix[transient_length+1:end,:])
       at_temperature = parse(temperature_dir)
       if persist_eigspectra
-        create_csvfile_and_write_eigspectrum(SIMULATIONS_EIGSPECTRA_DIR,at_temperature,eigspectrum)
+        create_csvfile_and_write_eigspectrum(SIMULATIONS_EIGSPECTRA_DIR, at_temperature, eigspectrum)
       end
       plot_eigen_spectrum(eigspectrum, at_temperature, r, GRAPHS_DIR_EIGSPECTRA)
     end

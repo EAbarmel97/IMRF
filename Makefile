@@ -12,7 +12,7 @@ ICN_REMOVE_AND_UPDATE := $(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e '
 
 DELETE_SIMULS := rm -rf simulations/eigspectra/* && rm -rf simulations/simulations_T_* && rm simulations/imrf_*.txt && rm simulations/*.csv
 
-DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/*
+DELETE_GRAPHS := rm -rf graphs/simulations/* && rm -rf graphs/psd/simulations/* && rm -rf graphs/eigspectra/*
 
 DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/eigspectra/* && rm -rf simulations_partitioned/simulations_T* && rm simulations_partitioned/imrf_*.txt
 

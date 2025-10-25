@@ -4,7 +4,7 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
   x = collect(Float64, 1:length(eigvals))
   str_temp = replace(string(round(at_temperature, digits=6)), "." => "_")
   full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(str_temp).pdf")
-  
+  isplay
   #persist graph if doesn't exist
   if !isfile(full_file_path)
       plt = plot(

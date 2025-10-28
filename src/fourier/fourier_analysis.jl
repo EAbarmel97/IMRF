@@ -44,7 +44,8 @@ function mean_psd_by_run(temperature_dir::String)::Vector{Float64}
     for i in eachindex(RFFTS_CSVS_INSIDE_TEMPERATURE_DIR)
         rfft_data_matrix  = load_data_matrix(ComplexF64, RFFTS_CSVS_INSIDE_TEMPERATURE_DIR[i]; drop_header=false)
         rfft_vector_data = vec(rfft_data_matrix)
-        
+        @show length(rfft_data_matrix)
+        @show length(tmp_psd)
         tmp_psd += psd(rfft_vector_data)/length(RFFTS_CSVS_INSIDE_TEMPERATURE_DIR) 
     end
 

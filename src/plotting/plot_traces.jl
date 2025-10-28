@@ -36,7 +36,7 @@ function plot_trace(file_path::String, run::Int64, save_to::String; statistic::F
     ylims!(-1, 1)
     xlims!(0, length(y))
 
-    savefig(plt, joinpath(save_to, "global_magnetization_r$run.pdf"))
+    savefig(plt, joinpath(save_to, "global_magnetization_r$run.png"))
 end
 
 """

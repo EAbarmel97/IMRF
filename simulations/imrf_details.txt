@@ -1,0 +1,1 @@
+details: ngrid:50, nruns:10, ngens:100

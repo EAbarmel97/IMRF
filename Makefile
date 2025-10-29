@@ -1,14 +1,5 @@
-include /home/eabarmel/.env
 # Define the directory for the Julia environment
-CLI := /storage5/eabarmel/IMRF/cli
-
-ICN_UPDATE_PROJECT_TOML := cp $(ICN_JULIA_DEPOT_PATH)/Project.toml Project.toml
-
-# Custom shell command to add a package from the environment and update Project.toml for ICN
-ICN_ADD_AND_UPDATE := $(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.add("$(ARG)");' && $(ICN_UPDATE_PROJECT_TOML)
-
-# Custom shell command to remove a package from the environment and update Project.toml for ICN
-ICN_REMOVE_AND_UPDATE := $(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.rm("$(ARG)");' && $(ICN_UPDATE_PROJECT_TOML)
+JULIA_DEPOT_PATH := $(shell pwd)/.julenv
 
 DELETE_SIMULS := rm -rf simulations/eigspectra/* && rm -rf simulations/simulations_T_* && rm simulations/imrf_*.txt && rm simulations/*.csv
 
@@ -18,49 +9,59 @@ DELETE_SIMULS_PARTITIONED := rm -rf simulations_partitioned/eigspectra/* && rm -
 
 DELETE_GRAPHS_PARTITIONED := rm -rf graphs_partitioned/eigspectra/*
 
-# Target to run Julia commands in the ICN environment
+# Update Project.toml
+UPDATE_PROJECT_TOML := cp $(JULIA_DEPOT_PATH)/Project.toml Project.toml
+
+# Custom shell command to add a package from the environment and update Project.toml
+ADD_AND_UPDATE := julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.add("$(ARG)");' && $(UPDATE_PROJECT_TOML)
+
+# Custom shell command to remove a package from the environment and update Project.toml
+REMOVE_AND_UPDATE := julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.rm("$(ARG)");' && $(UPDATE_PROJECT_TOML)
+
+# Target to run Julia commands in the environment
 julia_env:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(ARGS)
+	@julia --project=$(JULIA_DEPOT_PATH) $(ARGS)
 
-# Target to add a package to the ICN environment
+# Target to add a package to the environment
 add_to_env:
-	@$(ICN_ADD_AND_UPDATE)
+	@$(ADD_AND_UPDATE)
 
-# Target to remove a package from the ICN environment
+# Target to remove a package from the environment
 rm_from_env:
-	@$(ICN_REMOVE_AND_UPDATE)
+	@$(REMOVE_AND_UPDATE)
 
-# Target to resolve dependencies and instantiate the ICN environment
+# Target to resolve dependencies and instantiate the environment
 instantiate:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.instantiate()'
-	cp Project.toml $(ICN_JULIA_DEPOT_PATH)/Project.toml
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
+	@julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.instantiate()'
+	cp Project.toml $(JULIA_DEPOT_PATH)/Project.toml
+	@julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.resolve(); Pkg.instantiate()'
 
-# Target to precompile packages in the ICN environment
+
+# Target to precompile packages in the environment
 precompile:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.precompile()'
+	@julia --project=$(JULIA_DEPOT_PATH) -e 'using Pkg; Pkg.precompile()'
 
-# Target to simulate the Ising model
+# Target to simulate the RFIM
 simulate:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(nthreads) $(CLI)/simulate.jl $(ngrid) $(runs) $(gens) $(nthreads)
+	@julia --project=$(JULIA_DEPOT_PATH) --threads $(nthreads) cli/simulate.jl $(ngrid) $(runs) $(gens) $(nthreads)
 
+# Target to simulate the RFIM
 simulate_partitioned:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) --threads $(nthreads) $(CLI)/simulate_partitioned.jl $(ngrid) $(sublattice_ngrid) $(runs) $(gens) $(nthreads)
+	@julia --project=$(JULIA_DEPOT_PATH) --threads $(nthreads) cli/simulate_partitioned.jl $(ngrid) $(sublattice_ngrid) $(runs) $(gens) $(nthreads)
 
-# Target to plot the time series magnetization traces 
-plot_traces:                                                               
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_traces.jl $(assembled_magn)
+# Target to plot the trazes of the times series
+plot_traces:
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_traces.jl $(assembled_magn)
 
-# Target to plot the psd of the rfft                                
-plot_psd:                                                           
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_psd.jl   
+# Target to plot the trazes of the times series
+plot_psd:
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_psd.jl 
 
-# Target to plot eigspectra 
 plot_eigspectra:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra.jl $(realizations) $(transient_length) $(patterns) 
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra.jl $(realizations) $(transient_length) $(patterns) 
 
 plot_eigspectra_partitioned:
-	@$(ICN_JULIA_BIN) --project=$(ICN_JULIA_DEPOT_PATH) $(CLI)/plot_eigspectra_partitioned.jl $(transient_length) $(patterns)
+	@julia --project=$(JULIA_DEPOT_PATH) cli/plot_eigspectra_partitioned.jl $(transient_length) $(patterns)
 
 # Target to precompile packages in the environment
 cleanup_simulations:

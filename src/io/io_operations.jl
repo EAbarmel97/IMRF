@@ -101,6 +101,18 @@ function write_to_csv(file_to_write::String, value::Vector{<:Any})
   if !isfile(file_to_write)
     @error "file $file_to_write does not exist"
   end
+  
+  open(file_to_write, "a+") do io
+    seekend(io)
+    fz = filesize(file_to_write)
+    if fz > 0
+      seek(io,fz-1)
+      lastbyte = read(io, UInt8)
+      if lastbyte != UInt8('\n')
+        write(io, "\n")
+      end
+    end
+  end
 
   CSV.write(file_to_write, DataFrame(col1=value); append=true, delim=',')
   return

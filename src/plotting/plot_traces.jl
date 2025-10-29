@@ -29,14 +29,14 @@ function plot_trace(file_path::String, run::Int64, save_to::String; statistic::F
         linewidth  = 2,
         framestyle = :box,
         grid = false,
-        size = (850, 600),
+        size = (950, 600),
     )
 
     hline!(plt, [statistic(y)], label = L"\overline{M}_n", linewidth = 3)
     ylims!(-1, 1)
     xlims!(0, length(y))
 
-    savefig(plt, joinpath(save_to, "global_magnetization_r$run.pdf"))
+    savefig(plt, joinpath(save_to, "global_magnetization_r$run.png"))
 end
 
 """

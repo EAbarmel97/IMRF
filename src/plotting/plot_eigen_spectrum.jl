@@ -3,7 +3,7 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
   fit_data = linear_fit_log_eigspectrum_r2(eigvals) #intercept, exponent,  r2
   x = collect(Float64, 1:length(eigvals))
   str_temp = replace(string(round(at_temperature, digits=6)), "." => "_")
-  full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(str_temp).pdf")
+  full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(str_temp).png")
  
   #persist graph if doesn't exist
   if !isfile(full_file_path)
@@ -24,11 +24,11 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
           ),
           xlabel = L"n",
           ylabel = L"\lambda_n",
-          titlefont  = font(16, "Times New Roman"),
-          guidefont  = font(20, "Times New Roman"),
-          tickfont   = font(18, "Times New Roman"),
+          titlefont  = font(16, "Times"),
+          guidefont  = font(20, "Times"),
+          tickfont   = font(18, "Times"),
           legendfont = font(18),
-          fontfamily = "Times New Roman",
+          fontfamily = "Times",
           framestyle = :box,
           grid = false,
           legend = :topright,
@@ -79,7 +79,7 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
           x_annot,
           y_annot,
           text(latexstring("R^{2} = ", round(fit_data[3], digits = 4)), 
-          "Times New Roman", 
+          "Times", 
           16, 
           :left, 
           :bottom, 

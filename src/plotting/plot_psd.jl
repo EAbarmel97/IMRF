@@ -47,7 +47,7 @@ function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
   temperature = parse(temperature_dir)
   num_runs = RFFTS_CSVS_INSIDE_TEMPERATURE_DIR |> length
 
-  plot_file_path = joinpath(destination_dir, "psd_$(match(r"T_[0-9][0-9]_[0-9]+",temperature_dir).match)_r_1_$(num_runs).pdf")
+  plot_file_path = joinpath(destination_dir, "psd_$(match(r"T_[0-9][0-9]_[0-9]+",temperature_dir).match)_r_1_$(num_runs).png")
 
   if !isfile(plot_file_path)
     plt = plot(

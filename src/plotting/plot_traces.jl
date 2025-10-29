@@ -29,7 +29,7 @@ function plot_trace(file_path::String, run::Int64, save_to::String; statistic::F
         linewidth  = 2,
         framestyle = :box,
         grid = false,
-        size = (950, 600),
+        size = (850, 600),
     )
 
     hline!(plt, [statistic(y)], label = L"\overline{M}_n", linewidth = 3)

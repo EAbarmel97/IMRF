@@ -119,7 +119,7 @@ function write_to_csv(file_to_write::String, value::Vector{<:Any})
 end
 
 function write_to_txt(stream::IOStream, value::Any)
-  write(stream, value)
+  write(stream, string(value) * "\n")
   return
 end
 

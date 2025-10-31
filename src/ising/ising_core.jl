@@ -45,8 +45,10 @@ function do_run(
 	update_energy(i_l) #updates global energy                                                                  
 
 	#= Creation of generic .csv files containing global magnetization time series =#
-	magnetization_file_path = create_file(magnetization_dir, "global_magnetization_r$(run).csv")
-	write_to_csv(magnetization_file_path, i_l.global_magnetization)
+	#magnetization_file_path = create_file(magnetization_dir, "global_magnetization_r$(run).csv")
+	magnetization_file = open("global_magnetization_r$(lpad(run,3,'0')).txt", "w")
+	#write_to_csv(magnetization_file_path, i_l.global_magnetization)
+	write_to_txt(magnetization_file,i_l.global_magnetization)
 
 	#= Initial observations of the global magnetizaton are saved to their respective .txt files=#
 	if display_lattice
@@ -64,7 +66,7 @@ function do_run(
 		do_generation(i_l)
 		setfield!(i_l, :cur_gen, generation)
 
-		write_to_csv(magnetization_file_path, i_l.global_magnetization)
+		write_to_txt(magnetization_file, i_l.global_magnetization)
 
 		if display_lattice
 			open(generic_spin_grid_file, "a+") do io
@@ -73,6 +75,8 @@ function do_run(
 			end
 		end
 	end
+
+	close(magnetization_file)
 end
 
 """

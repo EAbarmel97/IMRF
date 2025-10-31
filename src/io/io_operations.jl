@@ -118,6 +118,11 @@ function write_to_csv(file_to_write::String, value::Vector{<:Any})
   return
 end
 
+function write_to_txt(stream::IOStream, value::Any)
+  write(stream, value)
+  return
+end
+
 function write_rffts(num_runs::Int64)
   #check if assembled_magnetization csv exists
   if filter((u) -> endswith(u, ".csv"), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0

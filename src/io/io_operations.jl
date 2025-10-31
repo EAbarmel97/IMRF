@@ -92,7 +92,7 @@ function write_to_csv(file_to_write::String, value::Any)
   if !isfile(file_to_write)
     @error "file $file_to_write does not exist"
   end
-  @show file_to_write
+  
   open(file_to_write, "a+") do io
     seekend(io)
     fz = filesize(file_to_write)
@@ -115,6 +115,11 @@ function write_to_csv(file_to_write::String, value::Vector{<:Any})
   end
 
   CSV.write(file_to_write, DataFrame(col1=value); append=true, delim=',')
+  return
+end
+
+function write_to_txt(stream::IOStream, value::Any)
+  write(stream, value)
   return
 end
 

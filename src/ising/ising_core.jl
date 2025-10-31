@@ -46,7 +46,7 @@ function do_run(
 
 	#= Creation of generic .csv files containing global magnetization time series =#
 	#magnetization_file_path = create_file(magnetization_dir, "global_magnetization_r$(run).csv")
-	magnetization_file = open("global_magnetization_r$(lpad(run,3,'0')).txt", "w")
+	magnetization_file = open(joinpath(magnetization_dir,"global_magnetization_r$(lpad(run,3,'0')).txt"), "w")
 	#write_to_csv(magnetization_file_path, i_l.global_magnetization)
 	write_to_txt(magnetization_file,i_l.global_magnetization)
 

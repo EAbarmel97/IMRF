@@ -1,7 +1,5 @@
 #julia project
-**/src/Manifest.toml 
-**/src/Project.toml
-.julenv
+Manifest.toml 
 
 #simulations/
 simulations/simulations_T_*

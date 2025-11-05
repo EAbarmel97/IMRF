@@ -30,10 +30,10 @@ function imrf_partitioned_info(N_GRID, SUBLATTICE_NGRID, NUM_RUNS, NUM_GENERATIO
   end
 end
 
-function simulations_dir(dir::String)
+function simulations_dir(dir::String; ext=".csv")::Vector{String}
   All_SIMULATIONS_DIRS = String[]
   if isequal(abspath(dir), SIMULATIONS_DIR)
-    if filter((u) -> endswith(u, ".csv"), readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)) |> length > 0
+    if filter((u) -> endswith(u, ext), readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)) |> length > 0
       All_SIMULATIONS_DIRS = readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)[4:end]
     else
       All_SIMULATIONS_DIRS = readdir(abspath(RFIM.SIMULATIONS_DIR), join=true)[3:end]
@@ -109,6 +109,11 @@ function write_to_csv(file_to_write::String, value::Any)
   return
 end
 
+function write_to_txt(stream::IOStream, value::Any)
+  write(stream, string(value) * "\n")
+  return
+end
+
 function write_to_csv(file_to_write::String, value::Vector{<:Any})
   if !isfile(file_to_write)
     @error "file $file_to_write does not exist"
@@ -118,14 +123,21 @@ function write_to_csv(file_to_write::String, value::Vector{<:Any})
   return
 end
 
-function write_to_txt(stream::IOStream, value::Any)
-  write(stream, value)
+function write_to_txt(stream::IOStream, value::Vector{<:Any})
+  for v in value
+    write_to_txt(stream, v)
+  end
   return
 end
 
-function write_rffts(num_runs::Int64)
-  #check if assembled_magnetization csv exists
-  if filter((u) -> endswith(u, ".csv"), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
+function write_rffts(num_runs::Int64; ext=".csv")
+  if ext != ".csv" && ext != ".txt"
+    @error "unsupported file extension $ext"
+    return
+  end
+
+  #check if assembled_magnetization file exists
+  if filter((u) -> endswith(u, ext), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
     All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[5:end]
   else
     All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
@@ -135,21 +147,29 @@ function write_rffts(num_runs::Int64)
   All_FOURIER_DIRS = joinpath.(All_SIMULATIONS_DIRS, "fourier")
   for i in eachindex(All_MAGNETIZATION_DIRS)
     for run in 1:num_runs
-      global_magn_ts_path = joinpath(All_MAGNETIZATION_DIRS[i], "global_magnetization_r$run.csv")
-      rfft_path = create_file(joinpath(All_FOURIER_DIRS[i], "rfft_global_magnetization_r$run.csv"))
+      global_magn_ts_path = joinpath(All_MAGNETIZATION_DIRS[i], "global_magnetization_r$(lpad(run,3,'0'))$(ext)")
+      rfft_path = create_file(joinpath(All_FOURIER_DIRS[i], "rfft_global_magnetization_r$(lpad(run,3,'0'))$(ext)"))
       if isfile(rfft_path)
         rfft_magnetiaztion_ts = FFTW.rfft(global_magn_ts_path)
-        write_rfft(rfft_magnetiaztion_ts, rfft_path)
+        write_rfft(rfft_magnetiaztion_ts, rfft_path; ext=ext)
       end
     end
   end
 end
 
-function write_rfft(arr::Vector{ComplexF64}, file_path::String)
-  write_to_csv(file_path, arr)
+function write_rfft(arr::Vector{ComplexF64}, file_path::String; ext=".csv")
+  if ext == ".csv"
+    write_to_csv(file_path, arr)
+  elseif ext == ".txt"
+    io = open(file_path, "w+")
+    write_to_txt(io, arr)
+    close(io)
+  else
+    @error "unsupported file extension $ext"
+  end
 end
 
-function write_csv_assembled_magnetization_by_temprature(write_to::String; statistic::Function=mean)
+function write_file_assembled_magnetization_by_temprature(write_to::String; statistic::Function=mean, ext=".csv")
   #this gets an array of dirs with the structure: ../simulations/simulations_T_xy_abcdefg_/
   All_TEMPERATURES_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
   All_MAGNETIZATION_DIRS = joinpath.(All_TEMPERATURES_DIRS, "magnetization")
@@ -164,28 +184,60 @@ function write_csv_assembled_magnetization_by_temprature(write_to::String; stati
         "_" => ".")
     )
     
-    magnetization = sample_magnetization_by_run(All_TEMPERATURES_DIRS[i]; statistic=statistic)
+    magnetization = sample_magnetization_by_run(All_TEMPERATURES_DIRS[i]; statistic=statistic, ext=ext)
     push!(magnetizations, magnetization)
     push!(temperatures, temperature)
   end
-
-  assembled_magnetization_file_path = create_file(joinpath(write_to, "$(statistic)_assembled_magnetization.csv"))
-  CSV.write(assembled_magnetization_file_path, DataFrame(t=temperatures, M_n=magnetizations); append=true, delim=',')
-end
-
-function create_csvfile_and_write_eigspectrum(dir_to_save::String, at_temperature::Float64,eigspectrum::Vector{Float64})
-  if contains(dir_to_save,"simulations_partitioned")
-    file_name = create_file(joinpath(dir_to_save, string("eigspectrum_partitioned_ising_T_",__format_str_float(at_temperature,6),".csv")))
+ 
+  assembled_magnetization_file_path = create_file(joinpath(write_to, "$(statistic)_assembled_magnetization$(ext)"))
+  if ext == ".csv"
+    CSV.write(assembled_magnetization_file_path, DataFrame(t=temperatures, M_n=magnetizations); append=true, delim=',')
+  elseif ext == ".txt"
+    io = open(assembled_magnetization_file_path, "w+")
+    for (t,m) in zip(temperatures, magnetizations)
+      write_to_txt(io, "$(t), $(m)")
+    end
+    close(io)
   else
-    file_name = create_file(joinpath(dir_to_save, string("eigspectrum_T_",__format_str_float(at_temperature,6),".csv")))
-  end    
-  write_to_csv(file_name, eigspectrum)
+    @error "unsupported file extension $ext"
+    return
+  end
 end
 
-function __count_lines_in_csv(file_path::String)
-  n::Int64 = 0
-  for _ in CSV.Rows(file_path; header=false, reusebuffer=true)
-    n += 1
+function create_file_and_write_eigspectrum(dir_to_save::String, at_temperature::Float64,eigspectrum::Vector{Float64}; ext=".csv")
+  if contains(dir_to_save,"simulations_partitioned")
+    file_name = create_file(joinpath(dir_to_save, string("eigspectrum_partitioned_ising_T_",__format_str_float(at_temperature,6),ext)))
+  else
+    file_name = create_file(joinpath(dir_to_save, string("eigspectrum_T_",__format_str_float(at_temperature,6),ext)))
+  end 
+  
+  if ext == ".csv"
+    write_to_csv(file_name, eigspectrum)
+  elseif ext == ".txt"
+    io = open(file_name, "w+")
+    write_to_txt(io, eigspectrum)
+    close(io)
+  else
+    @error "unsupported file extension $ext"
+    return
+  end
+end
+
+function __count_lines_in_file(file_path::String; ext=".csv")::Int64
+  n = 0
+  if ext == ".csv"
+    for _ in CSV.Rows(file_path; header=false, reusebuffer=true)
+      n += 1
+    end
+  elseif ext == ".txt"
+    io = open(file_path, "r")
+    for _ in eachline(io)
+      n += 1
+    end
+    close(io)
+  else
+    @error "unsupported file extension $ext"
+    return
   end
 
   return n

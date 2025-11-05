@@ -74,7 +74,7 @@ Calculate a statistical measure of magnetization from data files in a given dire
 # Returns
 - `Float64`: The computed statistic of the magnetization data across all runs.
 """
-function sample_magnetization_by_run(temperature_dir::String; statistic::Function=mean)::Float64
+function sample_magnetization_by_run(temperature_dir::String; statistic::Function=mean, ext=".csv")::Float64
     if !isdir(temperature_dir)
         @error "dir $(temperature_dir) does not exits!"
     end
@@ -84,7 +84,7 @@ function sample_magnetization_by_run(temperature_dir::String; statistic::Functio
     for run in eachindex(readdir(temperature_dir))
         magn_csv = joinpath(temperature_dir,
             "magnetization",
-            "global_magnetization_r$run.csv")
+            "global_magnetization_r$(lpad(run,3,'0'))$(ext)")
         if isfile(magn_csv)
             magnetization_data = load_data_matrix(Float64,
                 magn_csv;

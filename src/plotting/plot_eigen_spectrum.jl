@@ -3,7 +3,7 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
   fit_data = linear_fit_log_eigspectrum_r2(eigvals) #intercept, exponent,  r2
   x = collect(Float64, 1:length(eigvals))
   str_temp = replace(string(round(at_temperature, digits=6)), "." => "_")
-  full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(str_temp).pdf")
+  full_file_path = joinpath(dir_to_save, "eigspectrum_magnetization_data_matrix_$(str_temp).png")
  
   #persist graph if doesn't exist
   if !isfile(full_file_path)
@@ -90,7 +90,7 @@ function plot_eigen_spectrum(eigvals::Vector{Float64}, at_temperature::Float64, 
     end
 end
 
-function plot_eigen_spectra(r::Int64, transient_length::Int64, temperature_dirs::Vararg{String}; persist_eigspectra::Bool=false)
+function plot_eigen_spectra(r::Int64, transient_length::Int64, temperature_dirs::Vararg{String}; persist_eigspectra::Bool=false,  ext=".csv")
   num_runs, num_gens = runs_and_gens_imrf_details()
   if r > num_runs
     @error "impossible to plot eigspectra. 
@@ -107,7 +107,7 @@ function plot_eigen_spectra(r::Int64, transient_length::Int64, temperature_dirs:
       eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix[transient_length+1:end,:])
       at_temperature = parse(temperature_dir)
       if persist_eigspectra
-        create_csvfile_and_write_eigspectrum(SIMULATIONS_EIGSPECTRA_DIR, at_temperature, eigspectrum)
+        create_file_and_write_eigspectrum(SIMULATIONS_EIGSPECTRA_DIR, at_temperature, eigspectrum; ext=ext)
       end
       plot_eigen_spectrum(eigspectrum, at_temperature, r, GRAPHS_DIR_EIGSPECTRA)
     end
@@ -127,7 +127,7 @@ function plot_partitioned_eigen_spectra(transient_length::Int64, temperature_dir
       eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix[transient_length + 1:end,:])
       at_temperature = parse(temperature_dir)
       if persist_eigspectra
-        create_csvfile_and_write_eigspectrum(SIMULATIONS_PARTITIONED_EIGSPECTRA_DIR, at_temperature, eigspectrum)
+        create_file_and_write_eigspectrum(SIMULATIONS_PARTITIONED_EIGSPECTRA_DIR, at_temperature, eigspectrum; ext=ext)
       end
       plot_eigen_spectrum(eigspectrum, at_temperature, r, GRAPHS_PARTITIONED_EIGSPECTRA_DIR)
     end  

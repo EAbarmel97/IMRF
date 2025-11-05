@@ -22,14 +22,15 @@ end
 
 Determines the array containing sampling frecuencies when an abs path is given as argument
 """
-function FFTW.rfftfreq(file_path::String; fs::Int64=1)::Vector{Float64}
+function FFTW.rfftfreq(file_path::String; fs::Int64=1, ext=".csv")::Vector{Float64}
     if !isdir(abspath(file_path))
        @error "file $file_path does not exist"
+       return
     end
 
     magnetization_csv_file_path = readdir(joinpath((abspath(file_path)), "magnetization"), join=true) |> first 
 
-    sampling_rfft_freq = rfftfreq(__count_lines_in_csv(magnetization_csv_file_path),fs)
+    sampling_rfft_freq = rfftfreq(__count_lines_in_file(magnetization_csv_file_path; ext=ext),fs)
     freq_arr = convert(Vector{Float64},sampling_rfft_freq) 
     
     return freq_arr
@@ -39,7 +40,7 @@ function mean_psd_by_run(temperature_dir::String)::Vector{Float64}
     #getting all the ../temperature_dir/fourier subdirs  
     RFFTS_CSVS_INSIDE_TEMPERATURE_DIR = readdir(abspath(joinpath(temperature_dir,"fourier")), join=true)
     
-    size = __count_lines_in_csv(RFFTS_CSVS_INSIDE_TEMPERATURE_DIR[1])
+    size = __count_lines_in_file(RFFTS_CSVS_INSIDE_TEMPERATURE_DIR[1])
     tmp_psd = zeros(Float64,size) 
     for i in eachindex(RFFTS_CSVS_INSIDE_TEMPERATURE_DIR)
         rfft_data_matrix  = load_data_matrix(ComplexF64, RFFTS_CSVS_INSIDE_TEMPERATURE_DIR[i]; drop_header=false)

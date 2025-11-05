@@ -46,7 +46,7 @@ function do_run(
 
 	#= Creation of generic .csv files containing global magnetization time series =#
 	#magnetization_file_path = create_file(magnetization_dir, "global_magnetization_r$(run).csv")
-	magnetization_file = open("global_magnetization_r$(lpad(run,3,'0')).txt", "w")
+	magnetization_file = open(joinpath(magnetization_dir, "global_magnetization_r$(lpad(run,3,'0')).txt"), "w")
 	#write_to_csv(magnetization_file_path, i_l.global_magnetization)
 	write_to_txt(magnetization_file,i_l.global_magnetization)
 
@@ -179,7 +179,8 @@ function do_simulations(
 	include_Tc::Bool = false,
 	display_lattice::Bool = false,
 	generate_rffts::Bool = false,
-	write_csv_assembled_magnetization::Bool = false
+	write_file_assembled_magnetization::Bool = false,
+	ext=".csv"
 )
 	imrf_info(N_GRID, NUM_RUNS, NUM_GENERATIONS)
 
@@ -215,12 +216,12 @@ function do_simulations(
 		end
 	end
 
-	if write_csv_assembled_magnetization
-		write_csv_assembled_magnetization_by_temprature(SIMULATIONS_DIR; statistic = mean)
+	if write_file_assembled_magnetization
+		write_file_assembled_magnetization_by_temprature(SIMULATIONS_DIR; statistic = mean, ext=ext)
 	end
 
 	if generate_rffts
-		write_rffts(NUM_RUNS)
+		write_rffts(NUM_RUNS; ext=ext)
 	end
 end
 

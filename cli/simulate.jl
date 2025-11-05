@@ -11,7 +11,8 @@ function main(ARGS)
     IMRF.DEFAULT_TEMPERATURE_ARRAY,
     args...;
     generate_rffts=true, #writes a csv per run (at each fixed temp) containing the rfft of magnetization
-    write_csv_assembled_magnetization=true
+    write_file_assembled_magnetization=true,
+    ext=".txt"
   )
 end
 

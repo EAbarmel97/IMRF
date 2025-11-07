@@ -3,9 +3,14 @@
 
 Generates and saves PSD plots for all simulation directories within the SIMULATIONS_DIR directory.
 """
-function plot_psd()
-  #check if ensamblated_magnetization csv exists
-  if filter((u) -> endswith(u, ".csv"), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
+function plot_psd(;ext=".csv")
+   if ext != ".txt" && ext != ".csv"
+    @error "Unsupported file extension: $ext. Only .csv or .txt files are supported."
+    return
+  end
+
+  #check if ensamblated_magnetization file exists
+  if filter((u) -> endswith(u, ext), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
     All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[5:end]
   else
     All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]

@@ -161,7 +161,7 @@ function write_rfft(arr::Vector{ComplexF64}, file_path::String; ext=".csv")
   if ext == ".csv"
     write_to_csv(file_path, arr)
   elseif ext == ".txt"
-    io = open(file_path, "w+")
+    io = open(file_path, "w")
     write_to_txt(io, arr)
     close(io)
   else
@@ -193,7 +193,7 @@ function write_file_assembled_magnetization_by_temprature(write_to::String; stat
   if ext == ".csv"
     CSV.write(assembled_magnetization_file_path, DataFrame(t=temperatures, M_n=magnetizations); append=true, delim=',')
   elseif ext == ".txt"
-    io = open(assembled_magnetization_file_path, "w+")
+    io = open(assembled_magnetization_file_path, "w")
     for (t,m) in zip(temperatures, magnetizations)
       write_to_txt(io, "$(t), $(m)")
     end
@@ -214,7 +214,7 @@ function create_file_and_write_eigspectrum(dir_to_save::String, at_temperature::
   if ext == ".csv"
     write_to_csv(file_name, eigspectrum)
   elseif ext == ".txt"
-    io = open(file_name, "w+")
+    io = open(file_name, "w")
     write_to_txt(io, eigspectrum)
     close(io)
   else

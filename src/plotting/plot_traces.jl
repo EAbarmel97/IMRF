@@ -36,7 +36,7 @@ function plot_trace(file_path::String, run::Int64, save_to::String; statistic::F
     ylims!(-1, 1)
     xlims!(0, length(y))
 
-    savefig(plt, joinpath(save_to, "global_magnetization_r$run.png"))
+    savefig(plt, joinpath(save_to, "global_magnetization_r$(lpad(run,3,'0')).png"))
 end
 
 """
@@ -47,13 +47,13 @@ Generate and save plots of magnetization time series for multiple simulation run
 # Arguments
 - `statistic::Function = mean`: A function to calculate a statistic on the magnetization data (default is `mean`).
 """
-function plot_traces(statistic::Function = mean)
-    if filter(endswith(".csv"),readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
+function plot_traces(;statistic::Function = mean, ext=".csv")
+    if filter(endswith(ext),readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
         All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[5:end]
     else
         All_SIMULATIONS_DIRS = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
     end
-``
+
     All_MAGNETIZATION_DIRS = joinpath.(All_SIMULATIONS_DIRS, "magnetization")
     for i in eachindex(All_MAGNETIZATION_DIRS)
         num_runs = length(readdir(All_MAGNETIZATION_DIRS[i]))
@@ -62,7 +62,7 @@ function plot_traces(statistic::Function = mean)
 
         ts_plot_dir = create_dir(joinpath(GRAPHS_DIR_SIMULATIONS, str_simulation_temp), sub_dir)
         for run in 1:num_runs
-            plot_trace(joinpath(All_MAGNETIZATION_DIRS[i],"global_magnetization_r$run.csv"),run,ts_plot_dir; statistic = statistic)
+            plot_trace(joinpath(All_MAGNETIZATION_DIRS[i],"global_magnetization_r$(lpad(run,3,'0'))$(ext)"),run,ts_plot_dir; statistic = statistic)
         end    
     end    
 end
@@ -106,6 +106,6 @@ function plot_assembled_magnetization(assembled_magnetization_file_path::String,
         xlims!(0, maximum(magnetization_data[:, 1]))
         vline!(plt, [CRITICAL_TEMP, CRITICAL_TEMP], label = L"T_c", linewidth = 1, fillalpha = 0.02)
       
-        savefig(plt, joinpath(save_to, "assembled_magnetization.pdf"))
+        savefig(plt, joinpath(save_to, "assembled_magnetization.png"))
     end
 end

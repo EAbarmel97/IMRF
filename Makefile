@@ -1,6 +1,8 @@
 # Define the directory for the Julia environment
 include $(shell pwd)/.env
 
+CLI_DIR := $(REPO_DIR)/cli
+
 DELETE_SIMULS := rm -rf $(REPO_DIR)/simulations/eigspectra/* && rm -rf $(REPO_DIR)/simulations/simulations_T_* && rm $(REPO_DIR)/simulations/*.txt
 
 DELETE_GRAPHS := rm -rf $(REPO_DIR)/graphs/simulations/* && rm -rf $(REPO_DIR)/graphs/psd/simulations/* && rm -rf $(REPO_DIR)/graphs/eigspectra/*
@@ -37,25 +39,25 @@ precompile:
 
 # Target to simulate the RFIM
 simulate:
-	@$(JULIA_BIN) --project=$(REPO_DIR) --threads $(nthreads) cli/simulate.jl $(ngrid) $(runs) $(gens) $(nthreads)
+	@$(JULIA_BIN) --project=$(REPO_DIR) --threads $(nthreads) $(CLI_DIR)/simulate.jl $(ngrid) $(runs) $(gens) $(nthreads)
 
 # Target to simulate the RFIM
 simulate_partitioned:
-	@$(JULIA_BIN) --project=$(REPO_DIR) --threads $(nthreads) cli/simulate_partitioned.jl $(ngrid) $(sublattice_ngrid) $(runs) $(gens) $(nthreads)
+	@$(JULIA_BIN) --project=$(REPO_DIR) --threads $(nthreads) $(CLI_DIR)/simulate_partitioned.jl $(ngrid) $(sublattice_ngrid) $(runs) $(gens) $(nthreads)
 
 # Target to plot the trazes of the times series
 plot_traces:
-	@$(JULIA_BIN) --project=$(REPO_DIR) cli/plot_traces.jl $(assembled_magn)
+	@$(JULIA_BIN) --project=$(REPO_DIR) $(CLI_DIR)/plot_traces.jl $(assembled_magn)
 
 # Target to plot the trazes of the times series
 plot_psd:
-	@$(JULIA_BIN) --project=$(REPO_DIR) cli/plot_psd.jl 
+	@$(JULIA_BIN) --project=$(REPO_DIR) $(CLI_DIR)/plot_psd.jl 
 
 plot_eigspectra:
-	@$(JULIA_BIN) --project=$(REPO_DIR) cli/plot_eigspectra.jl $(realizations) $(transient_length) $(patterns)
+	@$(JULIA_BIN) --project=$(REPO_DIR) $(CLI_DIR)/plot_eigspectra.jl $(realizations) $(transient_length) $(patterns)
 
 plot_eigspectra_partitioned:
-	@$(JULIA_BIN) --project=$(REPO_DIR) cli/plot_eigspectra_partitioned.jl $(transient_length) $(patterns)
+	@$(JULIA_BIN) --project=$(REPO_DIR) $(CLI_DIR)/plot_eigspectra_partitioned.jl $(transient_length) $(patterns)
 
 # Target to precompile packages in the environment
 cleanup_simulations:

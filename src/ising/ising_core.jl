@@ -46,7 +46,9 @@ function do_run(
 
 	#= Creation of generic .csv files containing global magnetization time series =#
 	#magnetization_file_path = create_file(magnetization_dir, "global_magnetization_r$(run).csv")
-	magnetization_file = open(joinpath(magnetization_dir, "global_magnetization_r$(lpad(run,3,'0')).txt"), "w")
+	#create_file(joinpath(magnetization_dir, "global_magnetization_r$(lpad(run,3,'0')).txt"))
+	magnetization_file_path = touch(joinpath(magnetization_dir, "global_magnetization_r$(lpad(run,3,'0')).txt"))
+	magnetization_file = open(magnetization_file_path, "w")
 	#write_to_csv(magnetization_file_path, i_l.global_magnetization)
 	write_to_txt(magnetization_file,i_l.global_magnetization)
 
@@ -191,26 +193,35 @@ function do_simulations(
 
 	temps_runs_cartesian_prod = Iterators.product(temperatures, 1:NUM_RUNS)
 
-	@sync for (_, (temp, run)) in enumerate(temps_runs_cartesian_prod)
-		@spawn begin
-			if temp == CRITICAL_TEMP
-				str_temp = __format_str_float(CRITICAL_TEMP, 6)
-				aux_dir = create_dir(joinpath(SIMULATIONS_DIR, "simulations_T_"), sub_dir, str_temp)
-			else
-				str_temp = __format_str_float(temp, 6)
-				aux_dir = create_dir(joinpath(SIMULATIONS_DIR, "simulations_T_"), sub_dir, str_temp)
-			end
+	for temp in temperatures
+		if temp == CRITICAL_TEMP
+			str_temp = __format_str_float(CRITICAL_TEMP, 6)
+			aux_dir = create_dir(joinpath(SIMULATIONS_DIR, "simulations_T_"), sub_dir, str_temp)
+		else
+			str_temp = __format_str_float(temp, 6)
+			aux_dir = create_dir(joinpath(SIMULATIONS_DIR, "simulations_T_"), sub_dir, str_temp)
+		end
 
-			fourier_dir = create_dir(joinpath(aux_dir, "fourier"), sub_dir)
+		fourier_dir = create_dir(joinpath(aux_dir, "fourier"), sub_dir)
 
-			#= Global magnetization time series realization will be saved on subdirectories over folder simultations=#
-			magnetization_dir = create_dir(joinpath(aux_dir, "magnetization"), sub_dir)
-			grid_evolution_dir = nothing
+		#= Global magnetization time series realization will be saved on subdirectories over folder simultations=#
+		magnetization_dir = create_dir(joinpath(aux_dir, "magnetization"), sub_dir)
+
+		grid_evolution_dir = nothing
 			#= Subdirectory containg a .csv file with the unicode representation of how the spin grid evolves with each generation at each run =#
-			if display_lattice
-				grid_evolution_dir = create_dir(joinpath(aux_dir, "grid_evolution"), sub_dir)                                                                  #random initial magnetization on the interval [-1 ,1]#                                      
-			end
+		if display_lattice
+			grid_evolution_dir = create_dir(joinpath(aux_dir, "grid_evolution"), sub_dir)                                                                  #random initial magnetization on the interval [-1 ,1]#                                      
+		end
+	end
 
+	@threads for (temp, run) in collect(temps_runs_cartesian_prod)
+		begin
+			magnetization_dir = joinpath(SIMULATIONS_DIR, "simulations_T_" * __format_str_float(temp, 6), "magnetization")
+			println(magnetization_dir)
+			grid_evolution_dir = nothing
+            if display_lattice
+			    grid_evolution_dir = joinpath(SIMULATIONS_DIR, "grid_evolution", "simulations_T_" * __format_str_float(temp, 6) )                                                                 #random initial magnetization on the interval [-1 ,1]#                                      
+		    end
 			rand_magn = rand() * 2 - 1
 			do_run(temp, N_GRID, run, NUM_GENERATIONS, rand_magn, magnetization_dir, grid_evolution_dir)
 		end

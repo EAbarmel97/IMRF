@@ -36,11 +36,11 @@ function FFTW.rfftfreq(file_path::String; fs::Int64=1, ext=".csv")::Vector{Float
     return freq_arr
 end
 
-function mean_psd_by_run(temperature_dir::String)::Vector{Float64}
+function mean_psd_by_run(temperature_dir::String; ext=".csv")::Vector{Float64}
     #getting all the ../temperature_dir/fourier subdirs  
     RFFTS_CSVS_INSIDE_TEMPERATURE_DIR = readdir(abspath(joinpath(temperature_dir,"fourier")), join=true)
     
-    size = __count_lines_in_file(RFFTS_CSVS_INSIDE_TEMPERATURE_DIR[1])
+    size = __count_lines_in_file(RFFTS_CSVS_INSIDE_TEMPERATURE_DIR[1]; ext=ext)
     tmp_psd = zeros(Float64,size) 
     for i in eachindex(RFFTS_CSVS_INSIDE_TEMPERATURE_DIR)
         rfft_data_matrix  = load_data_matrix(ComplexF64, RFFTS_CSVS_INSIDE_TEMPERATURE_DIR[i]; drop_header=false)

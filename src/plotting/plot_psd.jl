@@ -20,7 +20,7 @@ function plot_psd(;ext=".csv")
     str_simulation_temp = match(r"simulations_T_[0-9][0-9]_[0-9]+", All_SIMULATIONS_DIRS[i]).match
     psd_plot_dir = create_dir(joinpath(PSD_GRAPHS_SIMULATIONS, str_simulation_temp), sub_dir)
 
-    plot_mean_psd_by_run(All_SIMULATIONS_DIRS[i], psd_plot_dir)
+    plot_mean_psd_by_run(All_SIMULATIONS_DIRS[i], psd_plot_dir; ext=ext)
   end
 end
 
@@ -33,7 +33,7 @@ Plots and saves the mean Power Spectral Density (PSD) for the given temperature 
 - `temperature_dir`: Directory with temperature data and Fourier files.
 - `destination_dir`: Directory to save the PSD plot.
 """
-function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
+function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String; ext=".csv")
   if isempty(readdir(joinpath(abspath(temperature_dir), "fourier"), join=true))
     @error " impossible to plot PSD. There are no rfts under '$(temperature_dir)/fourier'"
     return
@@ -41,7 +41,7 @@ function plot_mean_psd_by_run(temperature_dir::String, destination_dir::String)
 
   RFFTS_CSVS_INSIDE_TEMPERATURE_DIR = readdir(joinpath(abspath(temperature_dir), "fourier"), join=true)
 
-  mean_psd_array = mean_psd_by_run(temperature_dir)
+  mean_psd_array = mean_psd_by_run(temperature_dir; ext=ext)
   f = FFTW.rfftfreq(temperature_dir)
 
   f_without_DC = f[2:end]

@@ -61,12 +61,17 @@ Filters and returns a vector of directory names in the specified directory (`dir
 - If `dir` is equal to `SIMULATIONS_DIR`, it first filters out directories containing `.csv` files, and then excludes the first few entries in the list.
 - Issues a warning if no directories match a given regular expression.
 """
-function filter_dir_names_in_dir(dir::String, rgxs::Vararg{Regex})::Vector{String}
+function filter_dir_names_in_dir(dir::String, rgxs::Vararg{Regex}; ext=".csv")::Vector{String}
   dir_paths_array = String[]
   dirs_to_search_in = String[]
-
+  
+  if ext != ".csv" && ext != ".txt"
+    @error "unsupported file extension $ext"
+    return dir_paths_array
+  end
+  
   if isequal(abspath(dir), SIMULATIONS_DIR)
-    if filter((u) -> endswith(u, ".csv"), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
+    if filter((u) -> endswith(u, ext), readdir(abspath(SIMULATIONS_DIR), join=true)) |> length > 0
       dirs_to_search_in = readdir(abspath(SIMULATIONS_DIR), join=true)[4:end]
     else
       dirs_to_search_in = readdir(abspath(SIMULATIONS_DIR), join=true)[3:end]

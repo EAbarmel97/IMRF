@@ -132,10 +132,9 @@ function do_partitioned_run(
 	update_magnetization(i_l) #updates global magnetization                                                    
 	update_energy(i_l) #updates global energy
 
-	#= Creation of generic .csv files containing global magnetization time series =#
-	magnetization_file_path = create_file(magnetization_dir, "sublattices_magnetizations_r$(run).csv")
-
-	magnetization_file = open(magnetization_file_path, "w") do magnetization_file
+	#= Creation of generic files containing global magnetization time series =#
+    magnetization_file_path = joinpath(magnetization_dir, "sublattices_magnetizations_r$(lpad(run, 3, '0')).csv")
+	magnetization_file = open(magnetization_file_path, "w") do io
 		for generation in 1:num_generations
 			do_generation(i_l)
 			i_l.cur_gen = generation
@@ -144,7 +143,7 @@ function do_partitioned_run(
 			for sublattice_id in 1:num_sublattices
 				push!(sublattice_magnetizations, compute_local_magnetization(i_l, sublattice_ngrid, sublattice_id))
 			end
-			CSV.write(magnetization_file, Tables.table(permutedims(sublattice_magnetizations)), header = false, append = true)
+			CSV.write(io, Tables.table(permutedims(sublattice_magnetizations)), header = false, append = true)
 		end
 	end
 end
@@ -210,14 +209,13 @@ function do_simulations(
 		grid_evolution_dir = nothing
 			#= Subdirectory containg a .csv file with the unicode representation of how the spin grid evolves with each generation at each run =#
 		if display_lattice
-			grid_evolution_dir = create_dir(joinpath(aux_dir, "grid_evolution"), sub_dir)                                                                  #random initial magnetization on the interval [-1 ,1]#                                      
+			grid_evolution_dir = create_dir(joinpath(aux_dir, "grid_evolution"), sub_dir)                                     
 		end
 	end
 
 	@threads for (temp, run) in collect(temps_runs_cartesian_prod)
 		begin
 			magnetization_dir = joinpath(SIMULATIONS_DIR, "simulations_T_" * __format_str_float(temp, 6), "magnetization")
-			println(magnetization_dir)
 			grid_evolution_dir = nothing
             if display_lattice
 			    grid_evolution_dir = joinpath(SIMULATIONS_DIR, "grid_evolution", "simulations_T_" * __format_str_float(temp, 6) )                                                                 #random initial magnetization on the interval [-1 ,1]#                                      
@@ -277,18 +275,23 @@ function do_partitioned_simulations(
 
 	temps_runs_cartesian_prod = Iterators.product(temperatures, 1:NUM_RUNS)
 
-	@sync for (_, (temp, run)) in enumerate(temps_runs_cartesian_prod)
-		@spawn begin
-			if temp == CRITICAL_TEMP
-				str_temp = __format_str_float(CRITICAL_TEMP, 6)
-				aux_dir = create_dir(joinpath(SIMULATIONS_PARTITIONED_DIR, "simulations_T_"), sub_dir, str_temp)
-			else
-				str_temp = __format_str_float(temp, 6)
-				aux_dir = create_dir(joinpath(SIMULATIONS_PARTITIONED_DIR, "simulations_T_"), sub_dir, str_temp)
-			end
+	for temp in temperatures
+		if temp == CRITICAL_TEMP
+			str_temp = __format_str_float(CRITICAL_TEMP, 6)
+			aux_dir = create_dir(joinpath(SIMULATIONS_PARTITIONED_DIR, "simulations_T_"), sub_dir, str_temp)
+		else
+			str_temp = __format_str_float(temp, 6)
+			aux_dir = create_dir(joinpath(SIMULATIONS_PARTITIONED_DIR, "simulations_T_"), sub_dir, str_temp)
+		end
 
-			#= Global magnetization time series realization will be saved on subdirectories over folder simultations=#
-			magnetization_dir = create_dir(joinpath(aux_dir, "magnetization"), sub_dir)
+		#Global magnetization time series realization will be saved on subdirectories over folder simultations
+		magnetization_dir = create_dir(joinpath(aux_dir, "magnetization"), sub_dir)
+	end
+
+	@threads for (temp, run) in collect(temps_runs_cartesian_prod)
+		begin
+			#Global magnetization time series realization will be saved on subdirectories over folder simultations
+			magnetization_dir = joinpath(SIMULATIONS_PARTITIONED_DIR, "simulations_T_" * __format_str_float(temp, 6), "magnetization")
 
 			rand_magn = rand() * 2 - 1
 			do_partitioned_run(temp, N_GRID, SUBLATTICE_NGRID, run, NUM_GENERATIONS, rand_magn, magnetization_dir)

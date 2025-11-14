@@ -127,7 +127,7 @@ function plot_partitioned_eigen_spectra(transient_length::Int64, temperature_dir
       eigspectrum = compute_filtered_eigvals!(magnetization_data_matrix[transient_length + 1:end,:])
       at_temperature = parse(temperature_dir)
       if persist_eigspectra
-        create_file_and_write_eigspectrum(SIMULATIONS_PARTITIONED_EIGSPECTRA_DIR, at_temperature, eigspectrum; ext=ext)
+        create_file_and_write_eigspectrum(SIMULATIONS_PARTITIONED_EIGSPECTRA_DIR, at_temperature, eigspectrum; ext=".csv")
       end
       plot_eigen_spectrum(eigspectrum, at_temperature, r, GRAPHS_PARTITIONED_EIGSPECTRA_DIR)
     end  

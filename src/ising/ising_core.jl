@@ -220,8 +220,9 @@ function do_simulations(
             if display_lattice
 			    grid_evolution_dir = joinpath(SIMULATIONS_DIR, "grid_evolution", "simulations_T_" * __format_str_float(temp, 6) )                                                                 #random initial magnetization on the interval [-1 ,1]#                                      
 		    end
-			rand_magn = rand() * 2 - 1
-			do_run(temp, N_GRID, run, NUM_GENERATIONS, rand_magn, magnetization_dir, grid_evolution_dir)
+			#rand_magn = rand() * 2 - 1
+			init_magn=0.5
+			do_run(temp, N_GRID, run, NUM_GENERATIONS, init_magn, magnetization_dir, grid_evolution_dir)
 		end
 	end
 
